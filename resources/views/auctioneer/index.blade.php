@@ -77,7 +77,7 @@
                                 <td>{{ $product->quantity }}</td>
                                 <td>{{ $product->description }}</td>
                                 <td>{{ $product->starting_price }}</td>
-                                <td><span id="timer-{{ $product->id }}"></span></td>
+                                <td><span class="auction-timer" data-end-time="{{ $product->auction_time }}"></span></td>
                                 <td>
                                     <button class="btn btn-link text-primary" data-bs-toggle="modal" data-bs-target="#productModal-{{ $product->id }}">{{ __('View for Bidding') }}</button>
                                 </td>
@@ -114,7 +114,7 @@
                             <p><strong>Quantity:</strong> {{ $product->quantity }}</p>
                             <p><strong>Description:</strong> {{ $product->description }}</p>
                             <p><strong>Starting Price:</strong> {{ $product->starting_price }}</p>
-                            <p><strong>Auction Time:</strong> {{ $product->auction_time }}</p>
+                            <p class="auction-timer" data-end-time="{{ $product->auction_time }}"><strong>Auction Time:</strong> {{ $product->auction_time }}</p>
                         </div>
                     </div>
                 </div>
@@ -140,30 +140,34 @@
 
 <!-- JavaScript Code -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        @foreach ($products as $product)
-            if ("{{ $product->auction_time }}") {
-                let endTime_{{ $product->id }} = new Date("{{ $product->auction_time }}").getTime();
-                let countdownElement_{{ $product->id }} = document.getElementById("timer-{{ $product->id }}");
+    function startCountdown(timerElement) {
+        const endTime = new Date(timerElement.dataset.endTime).getTime();
 
-                function updateTimer_{{ $product->id }}() {
-                    let now = new Date().getTime();
-                    let timeLeft = endTime_{{ $product->id }} - now;
+        const timerInterval = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = endTime - now;
 
-                    if (timeLeft > 0) {
-                        let hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                        let minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                        let seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                        countdownElement_{{ $product->id }}.innerHTML = (hours > 0 ? hours + "h " : "") + minutes + "m " + seconds + "s";
-                    } else {
-                        countdownElement_{{ $product->id }}.innerHTML = "Auction ended";
-                        clearInterval(timer_{{ $product->id }});
-                    }
-                }
+            if (distance > 0) {
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                let timer_{{ $product->id }} = setInterval(updateTimer_{{ $product->id }}, 1000);
+                // Update the element with the countdown
+                timerElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            } else {
+                clearInterval(timerInterval);
+                timerElement.innerHTML = "Bidding Closed";
+                const submitButton = timerElement.closest('.product-card').querySelector('.submit-button');
+                if (submitButton) submitButton.disabled = true;
             }
-        @endforeach
+        }, 1000);
+    }
+
+    // Run countdown for each timer in both product list and modal
+    document.querySelectorAll('.auction-timer').forEach(timerElement => {
+        startCountdown(timerElement);
     });
 </script>
+
 @endsection

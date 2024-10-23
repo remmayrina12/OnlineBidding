@@ -121,6 +121,14 @@
             padding: 30px;
         }
     }
+
+    .auction-timer {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #d32f2f; /* Red color for countdown */
+        margin-top: 10px;
+    }
+
 </style>
 
 <div class="py-12">
@@ -132,6 +140,11 @@
             <div class="product-grid">
                 @foreach ($products as $product)
                 <div class="product-card">
+                    <!-- Timer -->
+                    <div id="timer{{ $product->id }}" class="auction-timer" data-end-time="{{ $product->auction_time}}">
+                        Loading...
+                    </div>
+
                     @if ($product->product_image)
                     <img src="{{ asset('storage/' . $product->product_image) }}" alt="{{ $product->product_name }}" class="product-image" />
                     @endif
@@ -143,16 +156,23 @@
                         <strong>Quantity:</strong> {{ $product->quantity }}<br />
                         <strong>Description:</strong> {{ $product->description }}<br />
                         <strong>Starting Price:</strong> ${{ number_format($product->starting_price, 2) }}<br />
+
                         @if (!empty($highestBids[$product->id]))
                         <strong>Highest Bid:</strong> {{ $highestBids[$product->id]->amount }}<br />
                         @if(Auth::user()->role == "auctioneer")
                         <strong>Bidder:</strong> {{ $highestBids[$product->id]->bidder->name }}<br />
-                        @endif @else
+                        @endif
                         <strong>No bids for this product.</strong><br />
                         @endif
-                        <strong>Auction Ends:</strong> {{ $product->auction_time }}<br />
+
                         <strong>Created by:</strong> {{ $product->auctioneer->name ?? 'Unknown' }}
                     </div>
+
+                    @if(Auth::user()->role == "auctioneer")
+                        <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $product->id }}">
+                            View Product
+                        </button>
+                        @endif
 
                     <!-- Bidder Modal Button -->
                     @if(Auth::user()->role == "bidder")
@@ -171,6 +191,24 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
+                                @if(session('success'))
+                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                        {{ session('success') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
+                                @if(session('failed'))
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        {{ session('failed') }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                @endif
+
+                                <!-- Timer -->
+                                <div id="timer{{ $product->id }}" class="auction-timer" data-end-time="{{ $product->auction_time}}">
+                                    Loading...
+                                </div>
+
                                 <!-- Product Image -->
                                 @if (!empty($product->product_image) && Storage::disk('public')->exists($product->product_image))
                                 <img src="{{ asset('storage/' . $product->product_image) }}" alt="{{ $product->product_name }}" class="img-fluid mb-3" />
@@ -189,7 +227,7 @@
                                 @endif @else
                                 <p><strong>No bids for this product.</strong></p>
                                 @endif
-                                <p><strong>Auction Ends:</strong> {{ $product->auction_time }}</p>
+
                                 <p><strong>Created by:</strong> {{ $product->auctioneer->name ?? 'Unknown' }}</p>
                             </div>
 
@@ -215,32 +253,41 @@
 </div>
 
 <script>
-    // Timer for each product
-    let endTime{{ $product->id }} = new Date("{{ $product->auction_time }}").getTime();
+    function startCountdown(timerElement) {
+        // Parse the end time from the data-end-time attribute
+        const endTime = new Date(timerElement.dataset.endTime).getTime();
 
-    // Update the count down every second
-    let timer{{ $product->id }} = setInterval(function() {
-        let now = new Date().getTime();
-        let distance = endTime{{ $product->id }} - now;
+        const timerInterval = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = endTime - now;
 
-        // Time calculations for days, hours, minutes, and seconds
-        let days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            if (distance > 0) {
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        // Display the result in the timer element
-        document.getElementById("timer{{ $product->id }}").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+                // Update the timer element with the countdown
+                timerElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            } else {
+                clearInterval(timerInterval);
+                timerElement.innerHTML = "Bidding Closed";
 
-        // If the count down is finished, show message
-        if (distance < 0) {
-            clearInterval(timer{{ $product->id }});
-            document.getElementById("timer{{ $product->id }}").innerHTML = "Bidding Closed";
-        }
-    }, 1000);
+                // Optionally disable the bid button
+                const submitButton = timerElement.closest('.product-card').querySelector('.submit-button');
+                if (submitButton) submitButton.disabled = true;
+            }
+        }, 1000);
+    }
+
+    // Initialize countdowns for all timers on the page
+    document.querySelectorAll('.auction-timer').forEach(timerElement => {
+        startCountdown(timerElement);
+    });
 </script>
 
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+
 
 @endsection

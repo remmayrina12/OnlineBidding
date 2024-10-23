@@ -38,7 +38,6 @@ class BidController extends Controller
 
         // Get the highest bid for this product
         $highestBid = Bid::where('product_id', $request->product_id)->max('amount');
-
         // Create the new bid
         $bid = new Bid;
         $bid->product_id = $request->product_id;
@@ -47,22 +46,31 @@ class BidController extends Controller
 
 
         $product = Product::find($request->product_id);
-        // Check if the bidding time has ended
-        if (now() > $product->bid_end_time) {
-            return response()->json(['error' => 'Bidding has closed for this product.'], 400);
+        // Check if the auction time has passed
+        if (now() > $product->auction_time) {
+            session()->flash('failed', 'Bidding has closed for this product.');
+            return redirect()->back();
+        }
+
+        // Check if the bid amount is lower than the auctioneer's starting price
+        if ($request->amount < $product->starting_price) {
+            session()->flash('failed', 'Your bid must be higher than the starting price of ' . number_format($product->starting_price, 2));
+            return redirect()->back();
         }
 
         // Check if the new bid is higher than the current highest bid
         if ($request->amount > $highestBid) {
-            // If the new bid is higher, save it as the highest bid
+            // If the new bid is valid, save it as the highest bid
             $bid->amount = $request->amount;
             $bid->highest_bid = $request->amount;
             $bid->save();
 
-            return response()->json(['success' => 'Your bid has been placed successfully.'], 200);
+            session()->flash('success', 'Your bid was successfully placed!');
+            return redirect()->back();
         } else {
-            // If the new bid is lower or equal, return an error response
-            return response()->json(['error' => 'Your bid must be higher than the current highest bid of ' . $highestBid], 400);
+            // If the new bid is lower or equal to the highest bid, return an error response
+            session()->flash('failed', 'Your bid must be higher than the current highest bid of ' . number_format($highestBid, 2));
+            return redirect()->back();
         }
     }
 

@@ -59,7 +59,7 @@ class ProductController extends Controller
         }
 
         // Set the auction end time to 1 hour from the current time
-        $product->auction_time = now()->addHour();
+        $product->auction_time = now()->addHours(1);
 
         $product->auctioneer_id = Auth::id();  // Store the ID of the logged-in auctioneer
 
@@ -146,7 +146,7 @@ class ProductController extends Controller
         }
 
         // Update the auction end time to 1 hour from the current time if needed
-        $product->auction_time = now()->addHour();
+        $product->auction_time = now()->addHours(1);
 
         // Save the updated product
         $product->save();

@@ -29,13 +29,12 @@
 
                 <!-- Top navigation -->
 
-                <a href="{{ route('home.show') }}" class="nav-link m-1">
-                    {{ __('Home') }}
-                </a>
+
                 <div class="d-flex justify-content-start">
                     @if (Auth::check() && Auth::user()->role == 'auctioneer')
-                        <a href="{{ route('auctioneer') }}" class="nav-link m-1">
-                            {{ __('Dashboard') }}
+
+                        <a href="{{ route('home.show') }}" class="nav-link m-1">
+                            {{ __('Home') }}
                         </a>
                         <a href="{{ route('auctioneer.create') }}" class="nav-link m-1">
                             {{ __('Create') }}
@@ -46,9 +45,9 @@
                     @endif
 
                     @if (Auth::check() && Auth::user()->role == 'bidder')
-                        <a href="{{ route('bidder') }}" class="nav-link m-1">
-                            {{ __('Dashboard') }}
-                        </a>
+                    <a href="{{ route('home.show') }}" class="nav-link m-1">
+                        {{ __('Home') }}
+                    </a>
                     @endif
 
 
