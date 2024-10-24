@@ -134,63 +134,55 @@
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-            <h1 class="text-3xl font-bold mb-6">Products List</h1>
+            <h1 class="text-3xl font-bold mb-6">Your Bids</h1>
 
             <!-- Product Grid -->
             <div class="product-grid">
-                @foreach ($products as $product)
+                @foreach ($bids as $bid)
                 <div class="product-card">
+
                     <!-- Timer -->
-                    <div id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}">
+                    <div id="countdownTimer{{ $bid->product->id }}" class="auction-timer" data-end-time="{{ strtotime($bid->product->auction_time) }}">
                         Loading...
                     </div>
 
-                    @if ($product->product_image)
-                    <img src="{{ asset('storage/' . $product->product_image) }}" alt="{{ $product->product_name }}" class="product-image" />
+                    <!-- Product Image -->
+                    @if ($bid->product->product_image)
+                    <img src="{{ asset('storage/' . $bid->product->product_image) }}" alt="{{ $bid->product->product_name }}" class="product-image" />
                     @endif
 
-                    <div class="product-title">{{ $product->product_name }}</div>
+                    <!-- Product Title -->
+                    <div class="product-title">{{ $bid->product->product_name }}</div>
 
+                    <!-- Product Details -->
                     <div class="product-details">
-                        <strong>Class:</strong> {{ $product->product_class }}<br />
-                        <strong>Quantity:</strong> {{ $product->quantity }}<br />
-                        <strong>Description:</strong> {{ $product->description }}<br />
-                        <strong>Starting Price:</strong> ${{ number_format($product->starting_price, 2) }}<br />
+                        <strong>Class:</strong> {{ $bid->product->product_class }}<br />
+                        <strong>Quantity:</strong> {{ $bid->product->quantity }}<br />
+                        <strong>Description:</strong> {{ $bid->product->description }}<br />
+                        <strong>Starting Price:</strong> ${{ number_format($bid->product->starting_price, 2) }}<br />
 
-                        @if (!empty($highestBids[$product->id]))
-                        <strong>Highest Bid:</strong> {{ $highestBids[$product->id]->amount }}<br />
-
-                            @if(Auth::id() == $product->auctioneer_id)
-                                <p><strong>Bidder:</strong> {{ $highestBids[$product->id]->bidder->name }}</p>
-                            @endif
-
-                        @else
-                        <strong>No bids for this product.</strong><br />
+                        <!-- Show highest bid -->
+                        @if (!empty($highestBids[$bid->product->id]))
+                        <strong>Highest Bid:</strong> {{ $highestBids[$bid->product->id]->amount }}<br />
                         @endif
 
-                        <strong>Created by:</strong> {{ $product->auctioneer->name ?? 'Unknown' }}
+                        <strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}
                     </div>
 
-                    @if(Auth::user()->role == "auctioneer")
-                        <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $product->id }}">
-                            View Product
-                        </button>
-                        @endif
-
-                    <!-- Bidder Modal Button -->
+                    <!-- Bid Button for Bidder -->
                     @if(Auth::user()->role == "bidder")
-                    <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $product->id }}">
+                    <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $bid->product->id }}">
                         Bid
                     </button>
                     @endif
                 </div>
 
                 <!-- Modal -->
-                <div class="modal fade" id="productModal{{ $product->id }}" tabindex="-1" aria-labelledby="productModalLabel{{ $product->id }}" aria-hidden="true">
+                <div class="modal fade" id="productModal{{ $bid->product->id }}" tabindex="-1" aria-labelledby="productModalLabel{{ $bid->product->id }}" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="productModalLabel{{ $product->id }}">{{ $product->product_name }}</h5>
+                                <h5 class="modal-title" id="productModalLabel{{ $bid->product->id }}">{{ $bid->product->product_name }}</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
@@ -208,53 +200,41 @@
                                 @endif
 
                                 <!-- Timer -->
-                                <div id="modalCountdownTimer{{ $product->id }}" class="auction-timer d-flex justify-content-center align-items-center " style="font-size: 3rem;" data-end-time="{{ strtotime($product->auction_time) }}">
+                                <div id="modalCountdownTimer{{ $bid->product->id }}" class="auction-timer d-flex justify-content-center align-items-center " style="font-size: 3rem;" data-end-time="{{ strtotime($bid->product->auction_time) }}">
                                     Loading...
                                 </div>
 
+
                                 <!-- Product Image -->
-                                @if (!empty($product->product_image) && Storage::disk('public')->exists($product->product_image))
-                                <img src="{{ asset('storage/' . $product->product_image) }}" alt="{{ $product->product_name }}" class="img-fluid mb-3" />
+                                @if (!empty($bid->product->product_image) && Storage::disk('public')->exists($bid->product->product_image))
+                                <img src="{{ asset('storage/' . $bid->product->product_image) }}" alt="{{ $bid->product->product_name }}" class="img-fluid mb-3" />
                                 @else
                                 <p>No image available</p>
                                 @endif
                                 <!-- Product Details -->
-                                <p><strong>Class:</strong> {{ $product->product_class }}</p>
-                                <p><strong>Quantity:</strong> {{ $product->quantity }}</p>
-                                <p><strong>Description:</strong> {{ $product->description }}</p>
-                                <p><strong>Starting Price:</strong> ${{ $product->starting_price }}</p>
-                                @if (!empty($highestBids[$product->id]))
-                                <p><strong>Highest Bid:</strong> {{ $highestBids[$product->id]->amount }}</p>
+                                <p><strong>Class:</strong> {{ $bid->product->product_class }}</p>
+                                <p><strong>Quantity:</strong> {{ $bid->product->quantity }}</p>
+                                <p><strong>Description:</strong> {{ $bid->product->description }}</p>
+                                <p><strong>Starting Price:</strong> ${{ $bid->product->starting_price }}</p>
 
-                                @if(Auth::id() == $product->auctioneer_id)
-                                    <p><strong>Bidder:</strong> {{ $highestBids[$product->id]->bidder->name }}</p>
+                                @if (!empty($highestBids[$bid->product->id]))
+                                <p><strong>Highest Bid:</strong> {{$highestBids[$bid->product->id]->amount }}</p>
                                 @endif
 
-                                @else
-                                <p><strong>No bids for this product.</strong></p>
-                                @endif
-
-                                <p><strong>Created by:</strong> {{ $product->auctioneer->name ?? 'Unknown' }}</p>
+                                <p><strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}</p>
                             </div>
 
                             <!-- Bid Form -->
-                            @if(Auth::user()->role == "bidder")
-                            @if(isset($alreadyBidOn[$product->id]))
-                            <div class="form-group d-flex justify-content-center align-items-center" style="height: 100px;">
-                                <p class="text-center">{{ __('You have already placed a bid on this product.') }}</p>
-                            </div>
-                            @else
-                            <form method="POST" action="{{ route('bidder.store') }}" class="w-100 p-3">
+                            <form method="POST" action="{{ route('bidder.update', $bid->product->id) }}" class="w-100 p-3">
                                 @csrf
-                                <input type="hidden" name="product_id" value="{{ $product->id }}" />
+                                @method('PUT')
+                                <input type="hidden" name="product_id" value="{{ $bid->product->id }}" />
                                 <div class="form-group">
                                     <label for="amount">{{ __('Bid Amount') }}</label>
                                     <input type="number" name="amount" id="amount" step="0.01" min="0.01" required class="form-control" />
                                 </div>
                                 <button type="submit" class="submit-button mt-3 w-100">{{ __('Place Bid') }}</button>
                             </form>
-                            @endif
-                            @endif
                         </div>
                     </div>
                 </div>

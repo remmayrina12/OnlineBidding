@@ -27,10 +27,16 @@ class Product extends Model
     {
         return $this->belongsTo(User::class, 'auctioneer_id');
     }
-
     public function bidder()
+    {
+        return $this->belongsTo(User::class, 'bidder_id');
+    }
+    public function bids()
     {
         return $this->hasMany(Bid::class);
     }
-
+    public function highestBid()
+    {
+        return $this->bids()->orderBy('amount', 'desc')->first();
+    }
 }

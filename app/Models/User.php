@@ -52,12 +52,16 @@ class User extends Authenticatable
 
     public function auctioneer()
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, 'auctioneer_id');
     }
 
     public function bidder()
     {
-        return $this->hasMany(Bid::class, 'bidder_id');
+        return $this->hasMany(User::class, 'bidder_id');
     }
 
+    public function bids()
+    {
+        return $this->hasMany(Bid::class);
+    }
 }

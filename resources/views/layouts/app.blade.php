@@ -48,6 +48,10 @@
                     <a href="{{ route('home.show') }}" class="nav-link m-1">
                         {{ __('Home') }}
                     </a>
+                    <a href="{{ route('bidder.show') }}" class="nav-link m-1">
+                        @csrf
+                        {{ __('Show') }}
+                    </a>
                     @endif
 
 

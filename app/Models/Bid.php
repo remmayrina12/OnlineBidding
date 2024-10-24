@@ -18,7 +18,7 @@ class Bid extends Model
 
     public function product()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Product::class, 'product_id');
     }
 
     /**
@@ -26,6 +26,6 @@ class Bid extends Model
      */
     public function bidder()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'bidder_id');
     }
 }

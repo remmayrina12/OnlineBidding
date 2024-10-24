@@ -58,8 +58,7 @@ class ProductController extends Controller
             $product->product_image = $imagePath;  // Store the path to the uploaded image
         }
 
-        // Set the auction end time to 1 hour from the current time
-        $product->auction_time = now()->addHours(1);
+        $product->auction_time = now()->addHour();
 
         $product->auctioneer_id = Auth::id();  // Store the ID of the logged-in auctioneer
 
@@ -71,32 +70,48 @@ class ProductController extends Controller
     }
 
 
+
     /**
      * Display the specified resource.
      */
     public function show()
-{
-    // Get all products with their auctioneer
-    $products = Product::with('auctioneer')->get();
+    {
+        // Get the currently authenticated bidder
+        $currentBidder = Auth::user();
 
-    // Initialize an array to store the highest bids and bidders for each product
-    $highestBids = [];
+        // Get all products with their auctioneer
+        $products = Product::with('auctioneer')->get();
 
-    // Loop through each product in the collection
-    foreach ($products as $product) {
-        // Find the highest bid for each product along with the bidder
-        $highestBid = Bid::where('product_id', $product->id)
-            ->with('bidder') // Include the user relationship (bidder)
-            ->orderBy('amount', 'desc') // Sort bids by amount (highest first)
-            ->first(); // Get the highest bid
+        // Initialize arrays to store the highest bids and the products where the user has already bid
+        $highestBids = [];
+        $alreadyBidOn = [];
 
-        // Store the highest bid and bidder's details in the array
-        $highestBids[$product->id] = $highestBid;
+        // Loop through each product in the collection
+        foreach ($products as $product) {
+            // Find the highest bid for each product along with the bidder
+            $highestBid = Bid::where('product_id', $product->id)
+                ->with('bidder') // Include the user relationship (bidder)
+                ->orderBy('amount', 'desc') // Sort bids by amount (highest first)
+                ->first(); // Get the highest bid
+
+            // Store the highest bid and bidder's details in the array
+            $highestBids[$product->id] = $highestBid;
+
+            // Check if the current bidder has already placed a bid on this product
+            $userBid = Bid::where('product_id', $product->id)
+                ->where('bidder_id', $currentBidder->id) // Check for the current user
+                ->first(); // Get their bid if it exists
+
+            // If the user has already bid on this product, store the product in the alreadyBidOn array
+            if ($userBid) {
+                $alreadyBidOn[$product->id] = true;
+            }
+        }
+
+        // Pass the products, highestBids array, and alreadyBidOn array to the view
+        return view('home', compact('products', 'highestBids', 'alreadyBidOn'));
     }
 
-    // Pass the products and highestBids array to the view
-    return view('home', compact('products', 'highestBids'));
-}
 
 
 

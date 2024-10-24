@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified', 'roleManager:auctioneer'])->group(functio
 // Bidder Routes
 Route::middleware(['auth', 'verified', 'roleManager:bidder'])->group(function () {
     Route::post('/bidder/store', [BidController::class, 'store'])->name('bidder.store');
-
-
+    Route::get('/bidder/show', [BidController::class, 'show'])->name('bidder.show');
+    Route::put('/bidder/update/{id}', [BidController::class, 'update'])->name('bidder.update');
+    Route::get('/bidder/edit/{id}', [BidController::class, 'edit'])->name('bidder.edit');
 });

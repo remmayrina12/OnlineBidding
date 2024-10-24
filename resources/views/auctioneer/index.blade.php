@@ -77,7 +77,7 @@
                                 <td>{{ $product->quantity }}</td>
                                 <td>{{ $product->description }}</td>
                                 <td>{{ $product->starting_price }}</td>
-                                <td><span class="auction-timer" data-end-time="{{ $product->auction_time }}"></span></td>
+                                <td id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}"></td>
                                 <td>
                                     <button class="btn btn-link text-primary" data-bs-toggle="modal" data-bs-target="#productModal-{{ $product->id }}">{{ __('View for Bidding') }}</button>
                                 </td>
@@ -114,7 +114,9 @@
                             <p><strong>Quantity:</strong> {{ $product->quantity }}</p>
                             <p><strong>Description:</strong> {{ $product->description }}</p>
                             <p><strong>Starting Price:</strong> {{ $product->starting_price }}</p>
-                            <p class="auction-timer" data-end-time="{{ $product->auction_time }}"><strong>Auction Time:</strong> {{ $product->auction_time }}</p>
+                            <div id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}">
+                                Loading...
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -138,36 +140,6 @@
     </div>
 @endforeach
 
-<!-- JavaScript Code -->
-<script>
-    function startCountdown(timerElement) {
-        const endTime = new Date(timerElement.dataset.endTime).getTime();
-
-        const timerInterval = setInterval(function() {
-            const now = new Date().getTime();
-            const distance = endTime - now;
-
-            if (distance > 0) {
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                // Update the element with the countdown
-                timerElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-            } else {
-                clearInterval(timerInterval);
-                timerElement.innerHTML = "Bidding Closed";
-                const submitButton = timerElement.closest('.product-card').querySelector('.submit-button');
-                if (submitButton) submitButton.disabled = true;
-            }
-        }, 1000);
-    }
-
-    // Run countdown for each timer in both product list and modal
-    document.querySelectorAll('.auction-timer').forEach(timerElement => {
-        startCountdown(timerElement);
-    });
-</script>
+<script src="{{ asset('js/countdown.js') }}" defer></script>
 
 @endsection
