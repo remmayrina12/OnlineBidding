@@ -171,7 +171,7 @@
                         <strong>Created by:</strong> {{ $product->auctioneer->name ?? 'Unknown' }}
                     </div>
 
-                    @if(Auth::user()->role == "auctioneer")
+                    @if(Auth::user()->role == "auctioneer" | Auth::user()->role == "admin")
                         <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $product->id }}">
                             View Product
                         </button>

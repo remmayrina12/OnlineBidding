@@ -79,7 +79,9 @@
                                 <td>{{ $product->starting_price }}</td>
                                 <td id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}"></td>
                                 <td>
-                                    <button class="btn btn-link text-primary" data-bs-toggle="modal" data-bs-target="#productModal-{{ $product->id }}">{{ __('View for Bidding') }}</button>
+                                    <button class="btn btn-outline-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#productModal-{{ $product->id }}" title="View product details to place a bid">
+                                        <i class="bi bi-eye-fill"></i> {{ __('View for Bidding') }}
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach

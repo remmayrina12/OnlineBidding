@@ -29,7 +29,7 @@
 
                 <!-- Top navigation -->
 
-
+                <!-- Auctioneer Nav -->
                 <div class="d-flex justify-content-start">
                     @if (Auth::check() && Auth::user()->role == 'auctioneer')
 
@@ -44,6 +44,7 @@
                         </a>
                     @endif
 
+                    <!-- Bidder Nav -->
                     @if (Auth::check() && Auth::user()->role == 'bidder')
                     <a href="{{ route('home.show') }}" class="nav-link m-1">
                         {{ __('Home') }}
@@ -51,6 +52,16 @@
                     <a href="{{ route('bidder.show') }}" class="nav-link m-1">
                         @csrf
                         {{ __('Show') }}
+                    </a>
+                    @endif
+
+                    <!-- Admin Nav -->
+                    @if (Auth::check() && Auth::user()->role == 'admin')
+                    <a href="{{ route('home.show') }}" class="nav-link m-1">
+                        {{ __('Home') }}
+                    </a>
+                    <a href="{{ route('admin.manageProduct') }}" class="nav-link m-1">
+                        {{ __('Manage Product') }}
                     </a>
                     @endif
 

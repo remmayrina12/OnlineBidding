@@ -80,7 +80,7 @@ class ProductController extends Controller
         $currentBidder = Auth::user();
 
         // Get all products with their auctioneer
-        $products = Product::with('auctioneer')->get();
+        $products = Product::where('product_post_status', '=', 'active')->with('auctioneer')->get();
 
         // Initialize arrays to store the highest bids and the products where the user has already bid
         $highestBids = [];

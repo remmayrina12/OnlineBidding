@@ -4,7 +4,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Bidder\BidController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Auctioneer\ProductController;
+use App\Http\Controllers\Admin\ManageProductController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -46,4 +48,11 @@ Route::middleware(['auth', 'verified', 'roleManager:bidder'])->group(function ()
     Route::get('/bidder/show', [BidController::class, 'show'])->name('bidder.show');
     Route::put('/bidder/update/{id}', [BidController::class, 'update'])->name('bidder.update');
     Route::get('/bidder/edit/{id}', [BidController::class, 'edit'])->name('bidder.edit');
+});
+
+// Admin Routes
+Route::middleware(['auth', 'verified', 'roleManager:admin'])->group(function () {
+    Route::get('/admin/manageProduct', [ManageProductController::class, 'index'])->name('admin.manageProduct');
+    Route::get('/admin/acceptProduct/{id}', [ManageProductController::class, 'acceptProduct'])->name('admin.acceptProduct');
+    Route::get('/admin/rejectProduct/{id}', [ManageProductController::class, 'rejectProduct'])->name('admin.rejectProduct');
 });

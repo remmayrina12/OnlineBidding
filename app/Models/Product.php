@@ -17,7 +17,8 @@ class Product extends Model
         'starting_price',
         'product_image',
         'auction_time',
-        'auctioneer_id'
+        'auctioneer_id',
+        'product_post_status'
 
     ];
 
