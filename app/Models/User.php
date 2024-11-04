@@ -20,10 +20,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'contact_number',
         'role',
-        'address',
-        'valid_id',
         'password'
     ];
 
@@ -48,6 +45,11 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function userInfo()
+    {
+        return $this->hasOne(UserInfo::class);
     }
 
     public function auctioneer()

@@ -37,6 +37,7 @@
         justify-content: space-around;
         margin-top: 1.5rem;
     }
+
 </style>
 
 <div class="py-12">
@@ -54,11 +55,13 @@
                         <tr>
                             <th>Product Image</th>
                             <th>Product Name</th>
-                            <th>Product Class</th>
+                            <th>Category</th>
                             <th>Quantity</th>
                             <th>Description</th>
                             <th>Starting Price</th>
                             <th>Auction Time</th>
+                            <th>Winner</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -73,11 +76,18 @@
                                     @endif
                                 </td>
                                 <td>{{ $product->product_name }}</td>
-                                <td>{{ $product->product_class }}</td>
+                                <td>{{ $product->category }}</td>
                                 <td>{{ $product->quantity }}</td>
                                 <td>{{ $product->description }}</td>
                                 <td>{{ $product->starting_price }}</td>
                                 <td id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}"></td>
+                                @if (!empty($highestBids[$product->id]))
+                                    <td>Name: {{$highestBids[$product->id]->bidder->name}} <br>
+                                    Highest Bid: {{$highestBids[$product->id]->amount}}</td>
+                                @else
+                                    <td>No Bidder</td>
+                                @endif
+                                <td>{{ $product->product_post_status }}</td>
                                 <td>
                                     <button class="btn btn-outline-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#productModal-{{ $product->id }}" title="View product details to place a bid">
                                         <i class="bi bi-eye-fill"></i> {{ __('View for Bidding') }}
@@ -102,6 +112,12 @@
                     <h3 class="modal-title" id="modalTitle">{{ $product->product_name }}</h3>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <div id="countdownTimer{{ $product->id }}"
+                    class="auction-timer"
+                    data-end-time="{{ strtotime($product->auction_time) }}"
+                    style="font-size: 2rem; font-weight: bold; text-align: center; color: #ff4500; display: flex; justify-content: center;">
+                    Loading...
+                </div>
                 <!-- Modal Body -->
                 <div class="modal-body">
                     <div class="row">
@@ -109,16 +125,21 @@
                         <div class="col-md-6 text-center modal-image">
                             <img src="{{ asset('storage/' . $product->product_image) }}" alt="{{ $product->product_name }}" class="img-fluid rounded">
                         </div>
+
                         <!-- Product Details -->
                         <div class="col-md-6">
                             <p><strong>Product Name:</strong> {{ $product->product_name }}</p>
-                            <p><strong>Product Class:</strong> {{ $product->product_class }}</p>
+                            <p><strong>Category:</strong> {{ $product->category }}</p>
                             <p><strong>Quantity:</strong> {{ $product->quantity }}</p>
                             <p><strong>Description:</strong> {{ $product->description }}</p>
                             <p><strong>Starting Price:</strong> {{ $product->starting_price }}</p>
-                            <div id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}">
-                                Loading...
-                            </div>
+                            @if (!empty($highestBids[$product->id]))
+                                <p><strong>Bidder:</strong> {{$highestBids[$product->id]->bidder->name}}</p>
+                                <p><strong>Highest Bid:</strong> {{$highestBids[$product->id]->amount}}</p>
+                            @else
+                                <td>No Bidder</td>
+                            @endif
+                            <p><strong class="fas fa-user fa-sm fa-fw mr-2 text-black-400"></strong>{{ $bidCounts[$product->id] ?? 0 }}</p>
                         </div>
                     </div>
                 </div>

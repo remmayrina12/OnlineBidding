@@ -36,8 +36,8 @@
 
     /* Product image */
     .product-image {
-        max-width: 100%;
-        max-height: 150px;
+        max-width: 50%;
+        max-height: 100px;
         object-fit: cover;
         border-radius: 8px;
         margin-bottom: 10px;
@@ -99,7 +99,6 @@
         box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
         transition: border-color 0.3s ease-in-out;
     }
-
     .form-group input[type="number"]:focus {
         border-color: #3b82f6; /* Blue focus */
         outline: none;
@@ -113,6 +112,13 @@
     /* Modal body */
     .modal-body {
         padding: 20px;
+    }
+
+    .modal-product-img {
+    width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    border-radius: 8px;
     }
 
     /* Media Queries */
@@ -129,51 +135,113 @@
         margin-top: 10px;
     }
 
+    /* Container for category label and buttons */
+    .category-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    /* Styling for the "Categories" label */
+    .category-label {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        margin-right: 15px; /* Space between label and buttons */
+    }
+
+    /* Container for buttons to align them horizontally */
+    .category-buttons {
+        display: flex;
+        gap: 10px; /* Space between each button */
+    }
+
+    /* Style for category buttons */
+    .btn-category {
+        display: inline-block;
+        background-color: #007bff; /* Primary blue color */
+        color: #fff; /* White text */
+        padding: 10px 20px; /* Padding inside buttons */
+        border-radius: 5px; /* Rounded corners */
+        text-decoration: none; /* Remove underline */
+        font-weight: bold; /* Bold text */
+        transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+    }
+
+    /* Hover effect */
+    .btn-category:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+        transform: scale(1.05); /* Slightly larger on hover */
+    }
+
+    /* Focus effect for accessibility */
+    .btn-category:focus {
+        outline: 2px solid #0056b3; /* Outline for focus */
+        outline-offset: 2px;
+    }
 </style>
+
+<div class="category-container">
+    <span class="category-label">Categories:</span>
+    <div class="category-buttons">
+        <a href="{{ route('bidder.show') }}" class="btn-category">All</a>
+        <a href="{{ route('bidder.category', 'Corn') }}" class="btn-category">Corn</a>
+        <a href="{{ route('bidder.category', 'Grains') }}" class="btn-category">Grains</a>
+        <!-- Add other categories as needed -->
+    </div>
+</div>
 
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-            <h1 class="text-3xl font-bold mb-6">Your Bids</h1>
+            <h1 class="text-3xl font-bold mb-6">On going auction you bid on.</h1>
 
             <!-- Product Grid -->
             <div class="product-grid">
                 @foreach ($bids as $bid)
-                <div class="product-card">
 
-                    <!-- Timer -->
+                @if ($bid->product->auction_time > now())
+
+                <div class="product-card">
+                    <strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}
                     <div id="countdownTimer{{ $bid->product->id }}" class="auction-timer" data-end-time="{{ strtotime($bid->product->auction_time) }}">
                         Loading...
                     </div>
 
-                    <!-- Product Image -->
                     @if ($bid->product->product_image)
-                    <img src="{{ asset('storage/' . $bid->product->product_image) }}" alt="{{ $bid->product->product_name }}" class="product-image" />
+                        <img src="{{ asset('storage/' . $bid->product->product_image) }}" alt="{{ $bid->product->product_name }}" class="product-image" />
                     @endif
 
-                    <!-- Product Title -->
                     <div class="product-title">{{ $bid->product->product_name }}</div>
 
-                    <!-- Product Details -->
                     <div class="product-details">
-                        <strong>Class:</strong> {{ $bid->product->product_class }}<br />
+                        <strong>Category:</strong> {{ $bid->product->category }}<br />
                         <strong>Quantity:</strong> {{ $bid->product->quantity }}<br />
                         <strong>Description:</strong> {{ $bid->product->description }}<br />
-                        <strong>Starting Price:</strong> ${{ number_format($bid->product->starting_price, 2) }}<br />
+                        <strong>Starting Price:</strong> {{ number_format($bid->product->starting_price, 2) }}<br />
 
-                        <!-- Show highest bid -->
                         @if (!empty($highestBids[$bid->product->id]))
-                        <strong>Highest Bid:</strong> {{ $highestBids[$bid->product->id]->amount }}<br />
+                            <strong>Highest Bid:</strong> {{ $highestBids[$bid->product->id]->amount }}<br />
+
+                            @if(Auth::id() == $bid->product->auctioneer_id)
+                                <p><strong>Bidder:</strong> {{ $highestBids[$bid->product->id]->bidder->name }}</p>
+                            @endif
+                        @else
+                            <strong>No bids for this product.</strong><br />
                         @endif
 
-                        <strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}
+                        <br /><strong class="fas fa-user fa-sm fa-fw mr-2 text-black-400"></strong>{{ $bidCounts[$bid->product->id] ?? 0 }}<br />
                     </div>
 
                     <!-- Bid Button for Bidder -->
-                    @if(Auth::user()->role == "bidder")
-                    <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $bid->product->id }}">
-                        Bid
-                    </button>
+                    @if ($bid->product->auction_time > now())
+                        <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $bid->product->id }}">
+                            Bid
+                        </button>
+                    @else
+                        <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $bid->product->id }}">
+                            View Winner
+                        </button>
                     @endif
                 </div>
 
@@ -186,68 +254,81 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                @if(session('success'))
-                                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                        {{ session('success') }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    @if(session('success'))
+                                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                            {{ session('success') }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    @endif
+                                    @if(session('failed'))
+                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                            {{ session('failed') }}
+                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    @endif
+
+                                    <!-- Timer -->
+                                    <div id="modalCountdownTimer{{ $bid->product->id }}" class="auction-timer d-flex justify-content-center align-items-center" style="font-size: 3rem;" data-end-time="{{ strtotime($bid->product->auction_time) }}">
+                                        Loading...
                                     </div>
-                                @endif
-                                @if(session('failed'))
-                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                        {{ session('failed') }}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
-                                @endif
 
-                                <!-- Timer -->
-                                <div id="modalCountdownTimer{{ $bid->product->id }}" class="auction-timer d-flex justify-content-center align-items-center " style="font-size: 3rem;" data-end-time="{{ strtotime($bid->product->auction_time) }}">
-                                    Loading...
-                                </div>
+                                    @if (!empty($highestBids[$bid->product->id]) && $highestBids[$bid->product->id]->bidder)
+                                        @if ($bid->product->auction_time < now())
+                                            <p class="d-flex justify-content-center align-items-center" style="font-size: 2rem;"><strong>Winner:</strong> {{ $highestBids[$bid->product->id]->bidder->name }}</p>
+                                        @endif
+                                    @else
+                                        <p class="d-flex justify-content-center align-items-center" style="font-size: 2rem;"><strong>No bids yet</strong></p>
+                                    @endif
 
+                                    <!-- Product Image -->
+                                    @if (!empty($bid->product->product_image) && Storage::disk('public')->exists($bid->product->product_image))
+                                        <img src="{{ asset('storage/' . $bid->product->product_image) }}" alt="{{ $bid->product->product_name }}" class="modal-product-img" />
+                                    @else
+                                        <p>No image available</p>
+                                    @endif
 
-                                <!-- Product Image -->
-                                @if (!empty($bid->product->product_image) && Storage::disk('public')->exists($bid->product->product_image))
-                                <img src="{{ asset('storage/' . $bid->product->product_image) }}" alt="{{ $bid->product->product_name }}" class="img-fluid mb-3" />
-                                @else
-                                <p>No image available</p>
-                                @endif
-                                <!-- Product Details -->
-                                <p><strong>Class:</strong> {{ $bid->product->product_class }}</p>
-                                <p><strong>Quantity:</strong> {{ $bid->product->quantity }}</p>
-                                <p><strong>Description:</strong> {{ $bid->product->description }}</p>
-                                <p><strong>Starting Price:</strong> ${{ $bid->product->starting_price }}</p>
+                                    <!-- Product Details -->
+                                    <p><strong class="fas fa-user fa-sm fa-fw mr-2 text-black-400"></strong>{{ $bidCounts[$bid->product->id] ?? 0 }}</p>
+                                    <p><strong>Category:</strong> {{ $bid->product->category }}</p>
+                                    <p><strong>Quantity:</strong> {{ $bid->product->quantity }}</p>
+                                    <p><strong>Description:</strong> {{ $bid->product->description }}</p>
+                                    <p><strong>Starting Price:</strong> {{ $bid->product->starting_price }}</p>
 
-                                @if (!empty($highestBids[$bid->product->id]))
-                                <p><strong>Highest Bid:</strong> {{$highestBids[$bid->product->id]->amount }}</p>
-                                @endif
+                                    @if (!empty($highestBids[$bid->product->id]))
+                                        <p><strong>Highest Bid:</strong> {{ $highestBids[$bid->product->id]->amount }}</p>
+                                    @endif
 
-                                <p><strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}</p>
+                                    <p><strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}</p>
+
+                                    <!-- Bid Form -->
+                                    <form method="POST" action="{{ route('bidder.update', $bid->product->id) }}" class="w-100 p-3">
+                                        @csrf
+                                        @method('PUT')
+                                        <input type="hidden" name="product_id" value="{{ $bid->product->id }}" />
+                                        <div class="form-group">
+                                            <label for="amount">{{ __('Bid Amount') }}</label>
+                                            <input type="number" name="amount" id="amount" step="0.01" min="0.01" required class="form-control" />
+                                        </div>
+                                        <button type="submit" class="submit-button mt-3 w-100">{{ __('Place Bid') }}</button>
+                                    </form>
                             </div>
-
-                            <!-- Bid Form -->
-                            <form method="POST" action="{{ route('bidder.update', $bid->product->id) }}" class="w-100 p-3">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="product_id" value="{{ $bid->product->id }}" />
-                                <div class="form-group">
-                                    <label for="amount">{{ __('Bid Amount') }}</label>
-                                    <input type="number" name="amount" id="amount" step="0.01" min="0.01" required class="form-control" />
-                                </div>
-                                <button type="submit" class="submit-button mt-3 w-100">{{ __('Place Bid') }}</button>
-                            </form>
                         </div>
                     </div>
                 </div>
+                @endif
                 @endforeach
             </div>
         </div>
     </div>
 </div>
 
+
+
+
+
 <script src="{{ asset('js/countdown.js') }}" defer></script>
 
 <!-- Bootstrap CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
-
 
 @endsection

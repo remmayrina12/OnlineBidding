@@ -16,10 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('contact_number',15);
             $table->string('role')->default('bidder');
-            $table->string('address');
-            $table->string('valid_id')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();

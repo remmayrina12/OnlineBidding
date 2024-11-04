@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('product_name');
-            $table->string('product_class');
+            $table->string('category');
             $table->Integer('quantity'); // Add quantity field
             $table->text('description');
             $table->decimal('starting_price', 10, 2);
@@ -22,6 +22,7 @@ return new class extends Migration
             $table->timestamp('auction_time')->nullable(); // Store auction end time
             $table->foreignId('auctioneer_id')->constrained('users')->onDelete('cascade'); // Reference to auctioneer
             $table->string('product_post_status')->default('pending');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

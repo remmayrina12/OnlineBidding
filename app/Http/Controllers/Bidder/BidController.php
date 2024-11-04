@@ -78,33 +78,39 @@ class BidController extends Controller
      * Display the specified resource.
      */
     public function show()
-{
-    // Get the currently authenticated user
-    $user = Auth::user();
+    {
+        // Get the currently authenticated user
+        $user = Auth::user();
 
-    // Fetch bids that the current user has placed
-    $bids = Bid::with('product')
-        ->where('bidder_id', $user->id) // Only get the bids by this user
-        ->get();
+        // Fetch bids that the current user has placed
+        $bids = Bid::with('product')
+            ->where('bidder_id', $user->id) // Only get the bids by this user
+            ->orderBy('created_at', 'desc') // Sort in descending order
+            ->get();
 
-    // Initialize an array to store the highest bids for each product
-    $highestBids = [];
+        // Initialize an array to store the highest bids for each product
+        $highestBids = [];
+        $bidCounts = [];
 
-    // Loop through each bid to find the highest bid for the associated product
-    foreach ($bids as $bid) {
-        // Find the highest bid for each product
-        $highestBid = Bid::where('product_id', $bid->product->id)
-            ->with('bidder') // Include the bidder's details
-            ->orderBy('amount', 'desc')
-            ->first();
+        // Loop through each bid to find the highest bid for the associated product
+        foreach ($bids as $bid) {
 
-        // Store the highest bid for this product
-        $highestBids[$bid->product->id] = $highestBid;
+            // Count the total number of bids for this product
+            $bidCounts[$bid->product->id] = Bid::where('product_id', $bid->product->id)->count();
+
+            // Find the highest bid for each product
+            $highestBid = Bid::where('product_id', $bid->product->id)
+                ->with('bidder') // Include the bidder's details
+                ->orderBy('amount', 'desc')
+                ->first();
+
+            // Store the highest bid for this product
+            $highestBids[$bid->product->id] = $highestBid;
+        }
+
+        // Pass the filtered bids and highest bids to the view
+        return view('bidder.show', compact('bids', 'highestBids', 'bidCounts'));
     }
-
-    // Pass the filtered bids and highest bids to the view
-    return view('bidder.show', compact('bids', 'highestBids'));
-}
 
 
     /**
@@ -178,4 +184,86 @@ class BidController extends Controller
     {
         //
     }
+
+    public function filterByCategory($category)
+    {
+        // Get the currently authenticated user
+        $user = Auth::user();
+
+        // Fetch products in the selected category with active status
+        $products = Product::where('category', $category)
+                            ->where('product_post_status', '=', 'active')
+                            ->with('auctioneer')
+                            ->get();
+
+        // Fetch the bids the current user has placed on these products
+        $bids = Bid::whereIn('product_id', $products->pluck('id')) // Only get bids for these products
+                    ->where('bidder_id', $user->id) // Only get bids by this user
+                    ->orderBy('created_at', 'desc') // Sort in descending order
+                    ->with('product') // Include product and auctioneer details
+                    ->get();
+
+        // Initialize arrays to store the highest bids and bid counts for each product
+        $highestBids = [];
+        $bidCounts = [];
+
+        // Loop through each product to find the highest bid and bid count
+        foreach ($bids as $bid) {
+            // Count the total number of bids for this product
+            $bidCounts[$bid->product->id] = Bid::where('product_id', $bid->product->id)->count();
+
+            // Find the highest bid for this product
+            $highestBid = Bid::where('product_id', $bid->product->id)
+                            ->with('bidder') // Include the bidder's details
+                            ->orderBy('amount', 'desc')
+                            ->first();
+
+            // Store the highest bid for this product
+            $highestBids[$bid->product->id] = $highestBid;
+        }
+
+        // Pass the filtered products, bids, highestBids, and bidCounts to the view
+        return view('bidder.show', compact('products', 'bids', 'highestBids', 'bidCounts', 'category'));
+    }
+
+
+    public function showAuctionWin()
+    {
+        $user = Auth::user();
+
+        // Find bids where the authenticated user is the highest bidder
+        $winningBids = Bid::with('product')
+                    ->where('bidder_id', $user->id)
+                    ->orderBy('created_at', 'desc') // Sort in descending order
+                    ->whereIn('amount', function ($query) {
+                // Subquery to get the highest bid for each product
+                $query->selectRaw('MAX(amount)')
+                    ->from('bids')
+                    ->groupBy('product_id');
+
+            })
+            ->get();
+
+            // Initialize arrays to store the highest bids and bid counts for each product
+        $highestBids = [];
+        $bidCounts = [];
+
+        // Loop through each product to find the highest bid and bid count
+        foreach ($winningBids as $bid) {
+            // Count the total number of bids for this product
+            $bidCounts[$bid->product->id] = Bid::where('product_id', $bid->product->id)->count();
+
+            // Find the highest bid for this product
+            $highestBid = Bid::where('product_id', $bid->product->id)
+                            ->with('bidder') // Include the bidder's details
+                            ->first();
+
+            // Store the highest bid for this product
+            $highestBids[$bid->product->id] = $highestBid;
+        }
+
+            // Pass the winning bids to the view
+            return view('bidder.showAuctionWin', compact('winningBids', 'highestBids', 'bidCounts'));
+    }
+
 }

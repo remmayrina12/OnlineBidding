@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\ProductStatusNotification;
 
+use function Laravel\Prompts\confirm;
+
 class ManageProductController extends Controller
 {
     /**
@@ -73,6 +75,7 @@ class ManageProductController extends Controller
     {
         $data = Product::find($id);
         $data->product_post_status = 'active';
+        $data->auction_time = now()->addHour();
         $data->save();
 
         return redirect()->back()->with('success', 'Product post status is change to active.');
@@ -82,6 +85,7 @@ class ManageProductController extends Controller
     {
         $data = Product::find($id);
         $data->product_post_status = 'reject';
+        $data->closed_at = now();
         $data->save();
 
         return redirect()->back()->with('failed', 'Product post status is change to rejected.');

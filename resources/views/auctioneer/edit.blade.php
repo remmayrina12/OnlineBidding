@@ -97,10 +97,13 @@
                     <input type="text" name="product_name" value="{{ $product->product_name}}" id="product_name" required>
                 </div>
 
-                <!-- Class -->
-                <div class="form-group">
-                    <label for="product_class">{{ __('Class') }}</label>
-                    <input type="text" name="product_class" value="{{ $product->product_class}}" id="product_class" required>
+                <!-- Category -->
+                <div class="form-group mb-3">
+                    <label for="category" class="form-label">{{ __('Category') }}</label>
+                    <select name="category" id="category" value="{{ $product->category}}" class="form-select" required>
+                        <option value="Corn">{{ __('Corn') }}</option>
+                        <option value="Grains">{{ __('Grains') }}</option>
+                    </select>
                 </div>
 
                 <!-- Quantity -->

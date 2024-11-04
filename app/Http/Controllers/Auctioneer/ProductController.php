@@ -16,9 +16,13 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::where('auctioneer_id', Auth::id())->get();
+        $products = Product::where('auctioneer_id', Auth::id())
+                            ->orderBy('created_at', 'desc') // Sort in descending order
+                            ->get();
+        $highestBids = $this->getHighestBidsForProducts($products);
+        $bidCounts = $this->getBidCounts($products);
 
-        return view('auctioneer.index', compact('products'));
+        return view('auctioneer.index', compact('products', 'highestBids', 'bidCounts'));
     }
 
     /**
@@ -37,7 +41,7 @@ class ProductController extends Controller
         // Validate the incoming request
         $request->validate([
             'product_name' => 'required|string|max:255',
-            'product_class' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
             'quantity' => 'required|integer|min:1',  // Validate quantity
             'description' => 'required|string',
             'starting_price' => 'required|numeric|min:0',
@@ -47,7 +51,7 @@ class ProductController extends Controller
         // Create a new product
         $product = new Product();
         $product->product_name = $request->product_name;
-        $product->product_class = $request->product_class;
+        $product->category = $request->category;
         $product->quantity = $request->quantity;  // Store the quantity
         $product->description = $request->description;
         $product->starting_price = $request->starting_price;
@@ -58,15 +62,13 @@ class ProductController extends Controller
             $product->product_image = $imagePath;  // Store the path to the uploaded image
         }
 
-        $product->auction_time = now()->addHour();
-
         $product->auctioneer_id = Auth::id();  // Store the ID of the logged-in auctioneer
 
         // Save the product
         $product->save();
 
         // Redirect to a success page or back to the dashboard with a success message
-        return redirect()->route('auctioneer.index')->with('success', 'Product created successfully.');
+        return redirect()->route('auctioneer.index')->with('success', 'Product requested successfully.');
     }
 
 
@@ -76,40 +78,19 @@ class ProductController extends Controller
      */
     public function show()
     {
-        // Get the currently authenticated bidder
-        $currentBidder = Auth::user();
-
         // Get all products with their auctioneer
-        $products = Product::where('product_post_status', '=', 'active')->with('auctioneer')->get();
+        $products = Product::where('product_post_status', '=', 'active')
+                            ->with('auctioneer')
+                            ->orderBy('created_at', 'desc') // Sort in descending order
+                            ->get();
 
         // Initialize arrays to store the highest bids and the products where the user has already bid
-        $highestBids = [];
-        $alreadyBidOn = [];
-
-        // Loop through each product in the collection
-        foreach ($products as $product) {
-            // Find the highest bid for each product along with the bidder
-            $highestBid = Bid::where('product_id', $product->id)
-                ->with('bidder') // Include the user relationship (bidder)
-                ->orderBy('amount', 'desc') // Sort bids by amount (highest first)
-                ->first(); // Get the highest bid
-
-            // Store the highest bid and bidder's details in the array
-            $highestBids[$product->id] = $highestBid;
-
-            // Check if the current bidder has already placed a bid on this product
-            $userBid = Bid::where('product_id', $product->id)
-                ->where('bidder_id', $currentBidder->id) // Check for the current user
-                ->first(); // Get their bid if it exists
-
-            // If the user has already bid on this product, store the product in the alreadyBidOn array
-            if ($userBid) {
-                $alreadyBidOn[$product->id] = true;
-            }
-        }
+        $highestBids = $this->getHighestBidsForProducts($products);
+        $alreadyBidOn = $this->getAlreadyBidOn($products);
+        $bidCounts = $this->getBidCounts($products);
 
         // Pass the products, highestBids array, and alreadyBidOn array to the view
-        return view('home', compact('products', 'highestBids', 'alreadyBidOn'));
+        return view('home', compact('products', 'highestBids', 'alreadyBidOn', 'bidCounts'));
     }
 
 
@@ -132,7 +113,7 @@ class ProductController extends Controller
         // Validate the incoming request
         $request->validate([
             'product_name' => 'required|string|max:255',
-            'product_class' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
             'quantity' => 'required|integer|min:1',  // Validate quantity
             'description' => 'required|string',
             'starting_price' => 'required|numeric|min:0',
@@ -144,7 +125,7 @@ class ProductController extends Controller
 
         // Update the product with new details
         $product->product_name = $request->product_name;
-        $product->product_class = $request->product_class;
+        $product->category = $request->category;
         $product->quantity = $request->quantity;  // Update the quantity
         $product->description = $request->description;
         $product->starting_price = $request->starting_price;
@@ -159,9 +140,6 @@ class ProductController extends Controller
             $imagePath = $request->file('product_image')->store('images', 'public');
             $product->product_image = $imagePath;
         }
-
-        // Update the auction end time to 1 hour from the current time if needed
-        $product->auction_time = now()->addHours(1);
 
         // Save the updated product
         $product->save();
@@ -179,16 +157,93 @@ class ProductController extends Controller
         // Find the product by its ID
         $product = Product::findOrFail($id);
 
-        if ($product) {
-            // Optionally, delete the image if needed
-            if ($product->product_image) {
-                Storage::disk('public')->delete($product->product_image);
-            }
-            // Delete the product
-            $product->delete();
-        }
+        // Soft delete the product
+        $product->delete();
 
         // Redirect back to the auctioneer index page
-        return redirect()->route('auctioneer.index')->with('success', 'Product deleted successfully.');
+        return redirect()->route('auctioneer.index')->with('success', 'Product archived successfully.');
     }
+
+    public function archived()
+    {
+        // Retrieve only soft-deleted (archived) products for the authenticated auctioneer
+        $archivedProducts = Product::onlyTrashed()->where('auctioneer_id', Auth::id())->get();
+
+        return view('auctioneer.archived', compact('archivedProducts'));
+    }
+
+    private function getHighestBidsForProducts($products)
+    {
+        $highestBids = [];
+
+        foreach ($products as $product) {
+            $highestBid = Bid::where('product_id', $product->id)
+                ->with('bidder')
+                ->orderBy('amount', 'desc')
+                ->first();
+
+            $highestBids[$product->id] = $highestBid;
+        }
+
+        return $highestBids;
+    }
+
+    private function getBidCounts($products)
+    {
+        $bidCounts = [];
+
+        foreach ($products as $product) {
+            // Count the total number of bids for this product
+            $bidCounts[$product->id] = Bid::where('product_id', $product->id)->count();
+
+        }
+
+        return $bidCounts;
+    }
+
+    private function getAlreadyBidOn($products)
+    {
+        // Get the currently authenticated bidder
+        $currentBidder = Auth::user();
+
+        $alreadyBidOn = [];
+
+        // Loop through each product in the collection
+        foreach ($products as $product) {
+            // Check if the current bidder has already placed a bid on this product
+            $userBid = Bid::where('product_id', $product->id)
+                        ->where('bidder_id', $currentBidder->id) // Check for the current user
+                        ->first(); // Get their bid if it exists
+
+            // If the user has already bid on this product, store the product in the alreadyBidOn array
+            if ($userBid) {
+                $alreadyBidOn[$product->id] = true;
+            }
+        }
+
+        return $alreadyBidOn;
+    }
+
+
+
+    public function filterByCategory($category)
+    {
+
+        // Fetch products in the selected category with active status and their auctioneer
+        $products = Product::where('category', $category)
+                            ->where('product_post_status', '=', 'active')
+                            ->with('auctioneer')
+                            ->orderBy('created_at', 'desc') // Sort in descending order
+                            ->get();
+
+        // Initialize arrays to store the highest bids and the products where the user has already bid
+        $highestBids = $this->getHighestBidsForProducts($products);
+        $alreadyBidOn = $this->getAlreadyBidOn($products);
+        $bidCounts = $this->getBidCounts($products);
+
+        // Pass the products, highestBids array, alreadyBidOn array, and bidCounts to the view
+        return view('home', compact('products', 'highestBids', 'alreadyBidOn', 'bidCounts', 'category'));
+    }
+
+
 }

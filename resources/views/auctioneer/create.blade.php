@@ -90,16 +90,20 @@
 
             <form method="POST" action="{{ route('auctioneer.store') }}" enctype="multipart/form-data">
                 @csrf
+
                 <!-- Product Name -->
                 <div class="form-group">
                     <label for="product_name">{{ __('Product Name') }}</label>
                     <input type="text" name="product_name" id="product_name" required>
                 </div>
 
-                <!-- Class -->
-                <div class="form-group">
-                    <label for="product_class">{{ __('Class') }}</label>
-                    <input type="text" name="product_class" id="product_class" required>
+                <!-- Category -->
+                <div class="form-group mb-3">
+                    <label for="category" class="form-label">{{ __('Category') }}</label>
+                    <select name="category" id="category" class="form-select" required>
+                        <option value="Corn">{{ __('Corn') }}</option>
+                        <option value="Grains">{{ __('Grains') }}</option>
+                    </select>
                 </div>
 
                 <!-- Quantity -->
@@ -136,4 +140,7 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 @endsection

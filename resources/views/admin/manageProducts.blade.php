@@ -68,11 +68,10 @@
                             <th>Owner Name</th>
                             <th>Product Image</th>
                             <th>Product Name</th>
-                            <th>Product Class</th>
+                            <th>Category</th>
                             <th>Quantity</th>
                             <th>Description</th>
                             <th>Starting Price</th>
-                            <th>Auction Time</th>
                             <th>Status</th>
                             <th>Accept</th>
                             <th>Reject</th>
@@ -90,11 +89,10 @@
                                     @endif
                                 </td>
                                 <td>{{ $manage->product_name }}</td>
-                                <td>{{ $manage->product_class }}</td>
+                                <td>{{ $manage->category }}</td>
                                 <td>{{ $manage->quantity }}</td>
                                 <td>{{ $manage->description }}</td>
                                 <td>{{ $manage->starting_price }}</td>
-                                <td id="countdownTimer{{ $manage->id }}" class="auction-timer" data-end-time="{{ strtotime($manage->auction_time) }}"></td>
                                 <td>{{ $manage->product_post_status }}</td>
                                 <td>
                                     <a href="{{route('admin.acceptProduct', $manage->id)}}" class="btn btn-outline-secondary">Accept</a>
@@ -111,7 +109,4 @@
         </div>
     </div>
 </div>
-
-<script src="{{ asset('js/countdown.js') }}" defer></script>
-
 @endsection
