@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class ProductController extends Controller
 {
@@ -30,46 +31,47 @@ class ProductController extends Controller
      */
     public function create()
     {
+
         return view('auctioneer.create');
     }
+
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        // Validate the incoming request
+        // Validate request
         $request->validate([
             'product_name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
-            'quantity' => 'required|integer|min:1',  // Validate quantity
+            'quantity' => 'required|integer|min:1',
             'description' => 'required|string',
             'starting_price' => 'required|numeric|min:0',
-            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',  // Validate image
+            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        // Create a new product
+        // Create and save the new product
         $product = new Product();
         $product->product_name = $request->product_name;
         $product->category = $request->category;
-        $product->quantity = $request->quantity;  // Store the quantity
+        $product->quantity = $request->quantity;
         $product->description = $request->description;
         $product->starting_price = $request->starting_price;
 
-        // Handle the image upload
+        // Image upload handling
         if ($request->hasFile('product_image')) {
             $imagePath = $request->file('product_image')->store('images', 'public');
-            $product->product_image = $imagePath;  // Store the path to the uploaded image
+            $product->product_image = $imagePath;
         }
 
-        $product->auctioneer_id = Auth::id();  // Store the ID of the logged-in auctioneer
-
-        // Save the product
+        $product->auctioneer_id = Auth::id();
         $product->save();
 
-        // Redirect to a success page or back to the dashboard with a success message
-        return redirect()->route('auctioneer.index')->with('success', 'Product requested successfully.');
+        return redirect()->route('auctioneer.index')->with('success', 'Product created successfully.');
     }
+
+
 
 
 
@@ -78,6 +80,8 @@ class ProductController extends Controller
      */
     public function show()
     {
+
+        $currentTime = Carbon::now(); // Current time
         // Get all products with their auctioneer
         $products = Product::where('product_post_status', '=', 'active')
                             ->with('auctioneer')
@@ -117,7 +121,8 @@ class ProductController extends Controller
             'quantity' => 'required|integer|min:1',  // Validate quantity
             'description' => 'required|string',
             'starting_price' => 'required|numeric|min:0',
-            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',  // Validate image
+            'product_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
         ]);
 
         // Find the existing product by its ID
@@ -129,6 +134,7 @@ class ProductController extends Controller
         $product->quantity = $request->quantity;  // Update the quantity
         $product->description = $request->description;
         $product->starting_price = $request->starting_price;
+
 
         // Handle the image upload if a new image is provided
         if ($request->hasFile('product_image')) {
@@ -245,5 +251,13 @@ class ProductController extends Controller
         return view('home', compact('products', 'highestBids', 'alreadyBidOn', 'bidCounts', 'category'));
     }
 
+    public function end(Product $product)
+    {
+        // Update auction status to 'closed' for the specific product
+        $product->update(['auction_status' => 'closed']);
+
+        // Return a success message or redirect back to the page
+        return redirect()->back()->with('success', 'Auction has been ended successfully');
+    }
 
 }

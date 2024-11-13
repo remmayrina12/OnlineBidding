@@ -91,18 +91,21 @@
             <form method="POST" action="{{ route('auctioneer.update', $product->id) }}" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
-                <!-- Product Name -->
-                <div class="form-group">
-                    <label for="product_name">{{ __('Product Name') }}</label>
-                    <input type="text" name="product_name" value="{{ $product->product_name}}" id="product_name" required>
-                </div>
 
                 <!-- Category -->
                 <div class="form-group mb-3">
                     <label for="category" class="form-label">{{ __('Category') }}</label>
                     <select name="category" id="category" value="{{ $product->category}}" class="form-select" required>
-                        <option value="Corn">{{ __('Corn') }}</option>
+                        <option value="Corn">{{ __('Corns') }}</option>
                         <option value="Grains">{{ __('Grains') }}</option>
+                    </select>
+                </div>
+
+                <!-- Product Name -->
+                <div class="form-group mb-3">
+                    <label for="product_name" class="form-label">{{ __('Product Name') }}</label>
+                    <select name="product_name" id="product_name" value="{{ $product->product_name}}" class="form-select" required>
+                        <!-- Initially empty options will be populated based on selected category -->
                     </select>
                 </div>
 
@@ -115,7 +118,7 @@
                 <!-- Description -->
                 <div class="form-group">
                     <label for="description">{{ __('Description') }}</label>
-                    <textarea name="description" id="description" rows="3" required>{{ $product->description }}</textarea>
+                    <textarea name="description" id="description" value="{{ $product->description}}" rows="3" required></textarea>
                 </div>
 
                 <!-- Image -->
@@ -133,11 +136,41 @@
                 <!-- Submit Button -->
                 <div class="form-group text-center">
                     <button type="submit" class="submit-button">
-                        {{ __('Update Product') }}
+                        {{ __('Create Product') }}
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.getElementById('category').addEventListener('change', function() {
+        var category = this.value;
+        var productSelect = document.getElementById('product_name');
+
+        // Clear previous options
+        productSelect.innerHTML = '';
+
+        // Add new options based on selected category
+        if (category === 'Corn') {
+            var products = ['NK6130', 'NK6410', 'NK6410 VIP', 'NK6414', 'NK6505', 'NK8840', 'NK8840 VIP', 'DK6919S', 'DK8131S', 'DK8899S', 'DK8282S', 'DK9118S'];
+        } else if (category === 'Grains') {
+            var products = ['NK5017', 'RH 9000', 'S6003'];
+        }
+
+        // Append options to product dropdown
+        products.forEach(function(product) {
+            var option = document.createElement('option');
+            option.value = product;
+            option.textContent = product;
+            productSelect.appendChild(option);
+        });
+    });
+
+    // Trigger change event on page load to populate product options based on the default category
+    document.getElementById('category').dispatchEvent(new Event('change'));
+</script>
 @endsection

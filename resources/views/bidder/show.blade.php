@@ -200,11 +200,11 @@
             <div class="product-grid">
                 @foreach ($bids as $bid)
 
-                @if ($bid->product->auction_time > now())
+                @if ($bid->product->auction_status == 'open')
 
                 <div class="product-card">
                     <strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}
-                    <div id="countdownTimer{{ $bid->product->id }}" class="auction-timer" data-end-time="{{ strtotime($bid->product->auction_time) }}">
+                    <div id="countdownTimer{{ $bid->product->id }}" class="auction-timer" data-end-time="{{ strtotime($bid->product->auction_time) }}" data-auction-status="{{ $bid->product->auction_status }}">
                         Loading...
                     </div>
 
@@ -234,15 +234,9 @@
                     </div>
 
                     <!-- Bid Button for Bidder -->
-                    @if ($bid->product->auction_time > now())
-                        <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $bid->product->id }}">
-                            Bid
-                        </button>
-                    @else
-                        <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $bid->product->id }}">
-                            View Winner
-                        </button>
-                    @endif
+                    <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $bid->product->id }}">
+                        Bid
+                    </button>
                 </div>
 
                 <!-- Modal -->
@@ -268,7 +262,7 @@
                                     @endif
 
                                     <!-- Timer -->
-                                    <div id="modalCountdownTimer{{ $bid->product->id }}" class="auction-timer d-flex justify-content-center align-items-center" style="font-size: 3rem;" data-end-time="{{ strtotime($bid->product->auction_time) }}">
+                                    <div id="modalCountdownTimer{{ $bid->product->id }}" class="auction-timer d-flex justify-content-center align-items-center" style="font-size: 3rem;" data-end-time="{{ strtotime($bid->product->auction_time) }}" data-auction-status="{{ $bid->product->auction_status }}">
                                         Loading...
                                     </div>
 

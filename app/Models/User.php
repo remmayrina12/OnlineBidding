@@ -47,9 +47,9 @@ class User extends Authenticatable
         ];
     }
 
-    public function userInfo()
+    public function info()
     {
-        return $this->hasOne(UserInfo::class);
+        return $this->hasOne(UserInfo::class, 'user_id', 'id');
     }
 
     public function auctioneer()
@@ -66,4 +66,5 @@ class User extends Authenticatable
     {
         return $this->hasMany(Bid::class);
     }
+
 }

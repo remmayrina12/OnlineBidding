@@ -184,16 +184,15 @@
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-            <h1 class="text-3xl font-bold mb-6">Auction you have won.</h1>
+            <h1 class="text-3xl font-bold mb-6">Auctions You Have Won</h1>
             <!-- Product Grid -->
             <div class="product-grid">
                 @foreach ($winningBids as $bid)
 
-                @if ($bid->product->auction_time < now())
-
+                @if ($bid->product->auction_status == 'closed')
                 <div class="product-card">
                     <strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}
-                    <div id="countdownTimer{{ $bid->product->id }}" class="auction-timer" data-end-time="{{ strtotime($bid->product->auction_time) }}">
+                    <div id="countdownTimer{{ $bid->product->id }}" class="auction-timer" data-end-time="{{ strtotime($bid->product->auction_time) }}" data-auction-status="{{ $bid->product->auction_status }}">
                         Loading...
                     </div>
 
@@ -202,7 +201,6 @@
                     @endif
 
                     <div class="product-title">{{ $bid->product->product_name }}</div>
-
                     <div class="product-details">
                         <strong>Category:</strong> {{ $bid->product->category }}<br />
                         <strong>Quantity:</strong> {{ $bid->product->quantity }}<br />
@@ -212,6 +210,7 @@
                         @if (!empty($highestBids[$bid->product->id]))
                             <strong>Highest Bid:</strong> {{ $highestBids[$bid->product->id]->amount }}<br />
 
+                            <!-- Display only if authenticated user is the auctioneer -->
                             @if(Auth::id() == $bid->product->auctioneer_id)
                                 <p><strong>Bidder:</strong> {{ $highestBids[$bid->product->id]->bidder->name }}</p>
                             @endif
@@ -222,14 +221,15 @@
                         <br /><strong class="fas fa-user fa-sm fa-fw mr-2 text-black-400"></strong>{{ $bidCounts[$bid->product->id] ?? 0 }}<br />
                     </div>
 
-                    <!-- Bid Button for Bidder -->
-
+                    <!-- Button to view the winner only if there is a winning bid -->
+                    @if(!empty($highestBids[$bid->product->id]))
                         <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $bid->product->id }}">
                             View Winner
                         </button>
+                    @endif
                 </div>
 
-                <!-- Modal -->
+                <!-- Modal for displaying the winner information -->
                 <div class="modal fade" id="productModal{{ $bid->product->id }}" tabindex="-1" aria-labelledby="productModalLabel{{ $bid->product->id }}" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
@@ -238,12 +238,11 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                    @if (!empty($highestBids[$bid->product->id]))
-                                        <p><strong>Congratulations to:</strong> {{ $highestBids[$bid->product->id]->bidder->name }}</p>
-                                    @else
-                                        <p><strong>No bids for this product.</strong></p>
-                                    @endif
-
+                                @if (!empty($highestBids[$bid->product->id]))
+                                    <p><strong>Congratulations to:</strong> {{ $highestBids[$bid->product->id]->bidder->name }}</p>
+                                @else
+                                    <p><strong>No bids for this product.</strong></p>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -254,9 +253,6 @@
         </div>
     </div>
 </div>
-
-
-
 
 
 <script src="{{ asset('js/countdown.js') }}" defer></script>

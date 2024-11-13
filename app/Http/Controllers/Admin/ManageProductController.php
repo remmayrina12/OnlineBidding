@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use App\Notifications\ProductStatusNotification;
 
 use function Laravel\Prompts\confirm;
+use App\Notifications\ProductStatusNotification;
 
 class ManageProductController extends Controller
 {
@@ -75,7 +76,8 @@ class ManageProductController extends Controller
     {
         $data = Product::find($id);
         $data->product_post_status = 'active';
-        $data->auction_time = now()->addHour();
+        $data->auction_time = Carbon::now()->addHour();
+        $data->auction_status = 'open';
         $data->save();
 
         return redirect()->back()->with('success', 'Product post status is change to active.');

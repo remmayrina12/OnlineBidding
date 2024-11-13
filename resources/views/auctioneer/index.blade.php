@@ -80,7 +80,7 @@
                                 <td>{{ $product->quantity }}</td>
                                 <td>{{ $product->description }}</td>
                                 <td>{{ $product->starting_price }}</td>
-                                <td id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}"></td>
+                                <td id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}" data-auction-status="{{ $product->auction_status }}"></td>
                                 @if (!empty($highestBids[$product->id]))
                                     <td>Name: {{$highestBids[$product->id]->bidder->name}} <br>
                                     Highest Bid: {{$highestBids[$product->id]->amount}}</td>
@@ -92,6 +92,9 @@
                                     <button class="btn btn-outline-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#productModal-{{ $product->id }}" title="View product details to place a bid">
                                         <i class="bi bi-eye-fill"></i> {{ __('View for Bidding') }}
                                     </button>
+                                </td>
+                                <td>
+                                    <a href="{{ route('auctioneer.end', $product->id) }}" class="btn btn-warning end-countdown-button">End Countdown</a>
                                 </td>
                             </tr>
                         @endforeach
@@ -115,6 +118,7 @@
                 <div id="countdownTimer{{ $product->id }}"
                     class="auction-timer"
                     data-end-time="{{ strtotime($product->auction_time) }}"
+                    data-auction-status="{{ $product->auction_status }}"
                     style="font-size: 2rem; font-weight: bold; text-align: center; color: #ff4500; display: flex; justify-content: center;">
                     Loading...
                 </div>

@@ -137,8 +137,8 @@ class BidController extends Controller
 
         // Find the current bid for this user on the product (if exists)
         $bid = Bid::where('product_id', $request->product_id)
-                  ->where('bidder_id', Auth::id())
-                  ->first();
+                    ->where('bidder_id', Auth::id())
+                    ->first();
 
         // If no bid exists for this user, create a new bid
         if (!$bid) {
@@ -231,20 +231,19 @@ class BidController extends Controller
     {
         $user = Auth::user();
 
-        // Find bids where the authenticated user is the highest bidder
-        $winningBids = Bid::with('product')
-                    ->where('bidder_id', $user->id)
-                    ->orderBy('created_at', 'desc') // Sort in descending order
-                    ->whereIn('amount', function ($query) {
-                // Subquery to get the highest bid for each product
+        // Find winning bids where the authenticated user is the highest bidder
+        $winningBids = Bid::with(['product', 'bidder'])
+            ->where('bidder_id', $user->id)
+            ->whereIn('amount', function ($query) {
+                // Subquery to get the maximum bid amount for each product
                 $query->selectRaw('MAX(amount)')
                     ->from('bids')
                     ->groupBy('product_id');
-
             })
+            ->orderBy('created_at', 'desc') // Sort in descending order
             ->get();
 
-            // Initialize arrays to store the highest bids and bid counts for each product
+        // Initialize arrays to store the highest bids and bid counts for each product
         $highestBids = [];
         $bidCounts = [];
 
@@ -256,14 +255,18 @@ class BidController extends Controller
             // Find the highest bid for this product
             $highestBid = Bid::where('product_id', $bid->product->id)
                             ->with('bidder') // Include the bidder's details
+                            ->orderByDesc('amount') // Get the highest amount first
                             ->first();
 
-            // Store the highest bid for this product
-            $highestBids[$bid->product->id] = $highestBid;
+            // Store the highest bid for this product if it matches the user's bid
+            if ($highestBid && $highestBid->bidder_id == $user->id) {
+                $highestBids[$bid->product->id] = $highestBid;
+            }
         }
 
-            // Pass the winning bids to the view
-            return view('bidder.showAuctionWin', compact('winningBids', 'highestBids', 'bidCounts'));
+        // Pass only the authenticated user's winning bids to the view
+        return view('bidder.showAuctionWin', compact('winningBids', 'highestBids', 'bidCounts'));
     }
+
 
 }

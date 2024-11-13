@@ -203,7 +203,8 @@
                 @foreach ($products as $product)
                     <div class="product-card">
                         <strong>Created by:</strong> {{ $product->auctioneer->name ?? 'Unknown' }}
-                        <div id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}">
+
+                        <div id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}" data-auction-status="{{ $product->auction_status }}">
                             Loading...
                         </div>
 
@@ -221,7 +222,6 @@
 
                             @if (!empty($highestBids[$product->id]))
                                 <strong>Highest Bid:</strong> {{ $highestBids[$product->id]->amount }}<br />
-
                                 @if(Auth::id() == $product->auctioneer_id)
                                     <strong>Bidder:</strong> {{ $highestBids[$product->id]->bidder->name }}<br />
                                 @endif
@@ -232,7 +232,7 @@
                         </div>
 
                         <!-- Modal Trigger for Bidder and Winner -->
-                        @if($product->auction_time > now())
+                        @if($product->auction_status == 'open')
                             @if(Auth::user()->role === "auctioneer" || Auth::user()->role === "admin")
                                 <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $product->id }}">
                                     View Product
@@ -258,7 +258,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    @if($product->auction_time > now())
+                                    @if($product->auction_status == 'open')
                                         @if(session('success'))
                                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                                 {{ session('success') }}
@@ -272,7 +272,7 @@
                                             </div>
                                         @endif
 
-                                        <div id="modalCountdownTimer{{ $product->id }}" class="auction-timer d-flex justify-content-center align-items-center" style="font-size: 3rem;" data-end-time="{{ strtotime($product->auction_time) }}">
+                                        <div id="modalCountdownTimer{{ $product->id }}" class="auction-timer d-flex justify-content-center align-items-center" style="font-size: 3rem;" data-end-time="{{ strtotime($product->auction_time) }}" data-auction-status="{{ $product->auction_status }}">
                                             Loading...
                                         </div>
 
@@ -334,6 +334,9 @@
 </div>
 
 <script src="{{ asset('js/countdown.js') }}" defer></script>
+<script src="{{ asset('js/starting-time.js') }}" defer></script>
+
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
 
 @endsection

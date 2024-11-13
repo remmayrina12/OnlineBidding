@@ -75,15 +75,6 @@
                         <hr class="sidebar-divider">
 
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('profile.edit') }}">
-                                <i class="fas fa-fw fa-tachometer-alt"></i>
-                                <span>Profile</span></a>
-                        </li>
-
-                        <!-- Divider -->
-                        <hr class="sidebar-divider">
-
-                        <li class="nav-item">
                             <a class="nav-link" href="{{ route('auctioneer.create') }}">
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
                                 <span>Create Product</span></a>
@@ -125,15 +116,6 @@
                             <a class="nav-link" href="{{ route('home.show') }}">
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
                                 <span>Home</span></a>
-                        </li>
-
-                        <!-- Divider -->
-                        <hr class="sidebar-divider">
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('profile.edit') }}">
-                                <i class="fas fa-fw fa-tachometer-alt"></i>
-                                <span>Profile</span></a>
                         </li>
 
                         <!-- Divider -->
@@ -296,8 +278,14 @@
                                         <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->name }}</span>
-                                            <img class="img-profile rounded-circle"
-                                                src="{{ url('assets/img/undraw_profile.svg') }}">
+
+                                                @if(optional(Auth::user()->info)->profile_picture)
+                                                    <img src="{{ asset('storage/' . Auth::user()->info->profile_picture) }}" class="img-profile rounded-circle" alt="Profile Picture">
+                                                @else
+                                                    <img src="{{ asset('assets/—Pngtree—vector add user icon_4101348.png') }}" class="img-profile rounded-circle" alt="Default Picture">
+                                                @endif
+
+
                                         <!-- Dropdown - User Information -->
                                         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                             aria-labelledby="userDropdown">

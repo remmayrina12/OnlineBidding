@@ -43,6 +43,8 @@ Route::middleware(['auth', 'verified', 'roleManager:auctioneer'])->group(functio
     Route::get('/auctioneer/index', [ProductController::class, 'index'])->name('auctioneer.index');
     Route::delete('/auctioneer/destroy/{id}', [ProductController::class, 'destroy'])->name('auctioneer.destroy');
     Route::get('/auctioneer/archived', [ProductController::class, 'archived'])->name('auctioneer.archived');
+
+    Route::get('/auctioneer/end/{product}', [ProductController::class, 'end'])->name('auctioneer.end');
 });
 
 // Bidder Routes
@@ -67,6 +69,6 @@ Route::middleware(['auth', 'verified', 'roleManager:admin'])->group(function () 
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::put('/profile/update/{userId}', [ProfileController::class, 'update'])->name('profile.update');
+
 });

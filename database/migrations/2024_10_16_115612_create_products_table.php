@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('starting_price', 10, 2);
             $table->string('product_image')->nullable(); // Add image field to store image path, can be nullable
             $table->timestamp('auction_time')->nullable(); // Store auction end time
+            $table->string('auction_status')->default('open');
             $table->foreignId('auctioneer_id')->constrained('users')->onDelete('cascade'); // Reference to auctioneer
             $table->string('product_post_status')->default('pending');
             $table->softDeletes();
