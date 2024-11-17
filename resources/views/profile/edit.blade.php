@@ -57,6 +57,12 @@
                             <input type="text" class="form-control" name="email" value="{{ $user->email }}" required>
                         </div>
 
+                        <!-- Contact Number -->
+                        <div class="form-group">
+                            <label for="contact_number">Contact Number</label>
+                            <input class="form-control" name="contact_number" value=" {{ $user->info->contact_number ?? '' }}">
+                        </div>
+
                         <!-- Address -->
                         <div class="form-group">
                             <label for="address">Address</label>
@@ -66,7 +72,7 @@
                         <!-- Valid ID -->
                         <div class="form-group">
                             <label for="valid_id">Valid ID</label><br>
-                            @if($user->info->valid_id && $user->info->valid_id)
+                            @if($user->info && $user->info->valid_id)
                                 <a href="{{ asset('storage/' . $user->info->valid_id) }}" target="_blank">View Current ID</a>
                             @endif
                             <input type="file" class="form-control" name="valid_id">
@@ -75,18 +81,27 @@
                         <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
                     </form>
 
-                    <!-- Form to handle profile picture deletion -->
-                    <form id="remove_profile_picture" action="{{ route('profile.update', $user->id) }}" method="POST" style="display: none;">
+                    <!-- Password Update Form -->
+                    <form action="{{ route('profile.updatePassword') }}" method="POST">
                         @csrf
                         @method('PUT')
-                        <input type="hidden" name="remove_profile_picture" value="true">
-                    </form>
 
-                    <!-- Form to handle valid ID deletion -->
-                    <form id="remove_valid_id" action="{{ route('profile.update', $user->id) }}" method="POST" style="display: none;">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" name="remove_valid_id" value="true">
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Current Password</label>
+                            <input type="password" name="current_password" id="current_password" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">New Password</label>
+                            <input type="password" name="password" id="password" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password_confirmation" class="form-label">Confirm Password</label>
+                            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning">Change Password</button>
                     </form>
                 </div>
             </div>
@@ -107,7 +122,7 @@
             </div>
             <div class="modal-body text-center">
                 <!-- Display the full-size image with custom scaling -->
-                <img src="{{ asset('storage/' . $user->info->profile_picture) }}" class="img-fluid" alt="Profile Picture" style="max-width: 100%; height: auto;">
+                <img src="{{ isset($user->info) && $user->info->profile_picture ? asset('storage/' . $user->info->profile_picture) : asset('default-profile-picture.png') }}" class="img-fluid" alt="Profile Picture">
             </div>
         </div>
     </div>

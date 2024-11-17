@@ -292,7 +292,12 @@
                                         <p><strong>Highest Bid:</strong> {{ $highestBids[$bid->product->id]->amount }}</p>
                                     @endif
 
-                                    <p><strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}</p>
+                                    <p>
+                                        <strong>Created by:</strong>
+                                            <a href="{{ route('profile.show', $bid->product->auctioneer->email ?? '') }}">
+                                                {{ $bid->product->auctioneer->name ?? 'Unknown' }}
+                                            </a>
+                                    </p>
 
                                     <!-- Bid Form -->
                                     <form method="POST" action="{{ route('bidder.update', $bid->product->id) }}" class="w-100 p-3">

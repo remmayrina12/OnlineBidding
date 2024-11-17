@@ -2,13 +2,14 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RatingController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Bidder\BidController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\Admin\ManageUserController;
 use App\Http\Controllers\Auctioneer\ProductController;
 use App\Http\Controllers\Admin\ManageProductController;
-use App\Http\Controllers\Admin\ManageUserController;
-use App\Http\Controllers\ProfileController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -70,5 +71,9 @@ Route::middleware(['auth', 'verified', 'roleManager:admin'])->group(function () 
 Route::middleware('auth')->group(function () {
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/update/{userId}', [ProfileController::class, 'update'])->name('profile.update');
-
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
+    Route::get('/profile/show/{email}', [ProfileController::class, 'show'])->name('profile.show');
 });
+
+Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
+

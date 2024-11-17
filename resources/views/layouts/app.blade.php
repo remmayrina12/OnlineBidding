@@ -53,6 +53,12 @@
                     <!-- Divider -->
                     <hr class="sidebar-divider my-0">
 
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('profile.show', Auth::user()->email) }}">
+                            <i class="fas fa-fw fa-tachometer-alt"></i>
+                            <span>View Profile</span></a>
+                    </li>
+
                     <!-- Auctioneer -->
                     @if (Auth::check() && Auth::user()->role == 'auctioneer')
 

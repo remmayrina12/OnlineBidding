@@ -6,7 +6,9 @@ use App\Models\User;
 use App\Models\UserInfo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Password;
 
 class ProfileController extends Controller
 {
@@ -39,8 +41,8 @@ class ProfileController extends Controller
             'name'            => 'required|string|max:255',
             'email'           => 'required|email|max:255|unique:users,email,' . $userId,
             'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'contact_number'  => 'required|string|max:15',
-            'address'         => 'required|string',
+            'contact_number'  => 'nullable|string|max:15',
+            'address'         => 'nullable|string',
             'valid_id'        => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
@@ -80,5 +82,26 @@ class ProfileController extends Controller
         } else {
             return redirect()->back()->with('error', 'Failed to update profile.');
         }
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|current_password',
+            'password' => ['required', 'confirmed'],
+        ]);
+
+        $request->user()->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->route('profile.edit')->with('success', 'Password updated successfully.');
+    }
+
+    public function show($email)
+    {
+        $user = User::where('email', $email)->firstOrFail();
+
+        return view('profile.show', compact('user'));
     }
 }

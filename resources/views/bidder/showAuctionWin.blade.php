@@ -239,7 +239,11 @@
                             </div>
                             <div class="modal-body">
                                 @if (!empty($highestBids[$bid->product->id]))
-                                    <p><strong>Congratulations to:</strong> {{ $highestBids[$bid->product->id]->bidder->name }}</p>
+                                <p><strong>Congratulations to:</strong>
+                                    <a href="{{ route('profile.show', $highestBids[$bid->product->id]->bidder->email) }}">
+                                        {{ $highestBids[$bid->product->id]->bidder->name }}
+                                    </a>
+                                </p>
                                 @else
                                     <p><strong>No bids for this product.</strong></p>
                                 @endif

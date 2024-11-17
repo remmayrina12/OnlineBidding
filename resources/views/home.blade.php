@@ -291,13 +291,23 @@
                                         @if (!empty($highestBids[$product->id]))
                                             <p><strong>Highest Bid:</strong> {{ number_format($highestBids[$product->id]->amount, 2) }}</p>
                                             @if(Auth::id() == $product->auctioneer_id)
-                                                <p><strong>Bidder:</strong> {{ $highestBids[$product->id]->bidder->name }}</p>
+                                                <p>
+                                                    <strong>Bidder:</strong>
+                                                    <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->email) }}">
+                                                        {{ $highestBids[$product->id]->bidder->name }}
+                                                    </a>
+                                                </p>
                                             @endif
                                         @else
                                             <p><strong>No bids for this product.</strong></p>
                                         @endif
 
-                                        <p><strong>Created by:</strong> {{ $product->auctioneer->name ?? 'Unknown' }}</p>
+                                        <p>
+                                            <strong>Created by:</strong>
+                                                <a href="{{ route('profile.show', $product->auctioneer->email ?? '') }}">
+                                                    {{ $product->auctioneer->name ?? 'Unknown' }}
+                                                </a>
+                                        </p>
 
                                         @if(Auth::user()->role == "bidder")
                                             @if(isset($alreadyBidOn[$product->id]))
@@ -318,7 +328,11 @@
                                         @endif
                                     @else
                                         @if (!empty($highestBids[$product->id]))
-                                            <p><strong>Congratulations to:</strong> {{ $highestBids[$product->id]->bidder->name }}</p>
+                                            <p><strong>Congratulations to:</strong>
+                                                <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->email) }}">
+                                                    {{ $highestBids[$product->id]->bidder->name }}
+                                                </a>
+                                            </p>
                                         @else
                                             <p><strong>No bids for this product.</strong></p>
                                         @endif
