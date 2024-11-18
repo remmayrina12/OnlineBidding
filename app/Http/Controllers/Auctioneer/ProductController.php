@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Auctioneer;
 
+use Carbon\Carbon;
 use App\Models\Bid;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Models\ArchivedProduct;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
 class ProductController extends Controller
 {
@@ -71,34 +72,28 @@ class ProductController extends Controller
         return redirect()->route('auctioneer.index')->with('success', 'Product created successfully.');
     }
 
-
-
-
-
     /**
      * Display the specified resource.
      */
     public function show()
     {
-
         $currentTime = Carbon::now(); // Current time
-        // Get all products with their auctioneer
+
+        // Get all products with their auctioneer and highest bid (if necessary)
         $products = Product::where('product_post_status', '=', 'active')
-                            ->with('auctioneer')
+                            ->with(['auctioneer', 'bids']) // Eager load auctioneer and bids relationships
                             ->orderBy('created_at', 'desc') // Sort in descending order
                             ->get();
 
-        // Initialize arrays to store the highest bids and the products where the user has already bid
+        // Initialize arrays to store the highest bids, and check if the user has already bid on the product
         $highestBids = $this->getHighestBidsForProducts($products);
         $alreadyBidOn = $this->getAlreadyBidOn($products);
         $bidCounts = $this->getBidCounts($products);
+        $allBids = $this->getBidsForProducts($products);
 
-        // Pass the products, highestBids array, and alreadyBidOn array to the view
-        return view('home', compact('products', 'highestBids', 'alreadyBidOn', 'bidCounts'));
+        // Pass the products, highestBids, alreadyBidOn, and bidCounts to the view
+        return view('home', compact('products', 'highestBids', 'alreadyBidOn', 'bidCounts', 'allBids'));
     }
-
-
-
 
     /**
      * Show the form for editing the specified resource.
@@ -163,8 +158,24 @@ class ProductController extends Controller
         // Find the product by its ID
         $product = Product::findOrFail($id);
 
-        // Soft delete the product
-        $product->delete();
+        // Archive the product by copying its data to the archived_products table
+        ArchivedProduct::create([
+            'original_product_id' => $product->id,
+            'product_name' => $product->product_name,
+            'category' => $product->category,
+            'quantity' => $product->quantity,
+            'description' => $product->description,
+            'starting_price' => $product->starting_price,
+            'product_image' => $product->product_image,
+            'auction_time' => $product->auction_time,
+            'auction_status' => $product->auction_status,
+            'auctioneer_id' => $product->auctioneer_id,
+            'product_post_status' => $product->product_post_status,
+            'archived_at' => now(),
+        ]);
+
+        // Permanently delete the product from the products table
+        $product->forceDelete();
 
         // Redirect back to the auctioneer index page
         return redirect()->route('auctioneer.index')->with('success', 'Product archived successfully.');
@@ -172,11 +183,12 @@ class ProductController extends Controller
 
     public function archived()
     {
-        // Retrieve only soft-deleted (archived) products for the authenticated auctioneer
-        $archivedProducts = Product::onlyTrashed()->where('auctioneer_id', Auth::id())->get();
+        // Retrieve archived products for the authenticated auctioneer
+        $archivedProducts = ArchivedProduct::where('auctioneer_id', Auth::id())->get();
 
         return view('auctioneer.archived', compact('archivedProducts'));
     }
+
 
     private function getHighestBidsForProducts($products)
     {
@@ -205,6 +217,16 @@ class ProductController extends Controller
         }
 
         return $bidCounts;
+    }
+
+    private function getBidsForProducts($products)
+    {
+        $bids = [];
+        foreach ($products as $product) {
+            // Fetch all bids for this product, sorted by bid amount in descending order
+            $bids[$product->id] = $product->bids->sortByDesc('amount');
+        }
+        return $bids;
     }
 
     private function getAlreadyBidOn($products)

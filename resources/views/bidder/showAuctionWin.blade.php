@@ -188,70 +188,120 @@
             <!-- Product Grid -->
             <div class="product-grid">
                 @foreach ($winningBids as $bid)
-
-                @if ($bid->product->auction_status == 'closed')
-                <div class="product-card">
-                    <strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}
-                    <div id="countdownTimer{{ $bid->product->id }}" class="auction-timer" data-end-time="{{ strtotime($bid->product->auction_time) }}" data-auction-status="{{ $bid->product->auction_status }}">
-                        Loading...
-                    </div>
-
-                    @if ($bid->product->product_image)
-                        <img src="{{ asset('storage/' . $bid->product->product_image) }}" alt="{{ $bid->product->product_name }}" class="product-image" />
-                    @endif
-
-                    <div class="product-title">{{ $bid->product->product_name }}</div>
-                    <div class="product-details">
-                        <strong>Category:</strong> {{ $bid->product->category }}<br />
-                        <strong>Quantity:</strong> {{ $bid->product->quantity }}<br />
-                        <strong>Description:</strong> {{ $bid->product->description }}<br />
-                        <strong>Starting Price:</strong> {{ number_format($bid->product->starting_price, 2) }}<br />
-
-                        @if (!empty($highestBids[$bid->product->id]))
-                            <strong>Highest Bid:</strong> {{ $highestBids[$bid->product->id]->amount }}<br />
-
-                            <!-- Display only if authenticated user is the auctioneer -->
-                            @if(Auth::id() == $bid->product->auctioneer_id)
-                                <p><strong>Bidder:</strong> {{ $highestBids[$bid->product->id]->bidder->name }}</p>
-                            @endif
-                        @else
-                            <strong>No bids for this product.</strong><br />
-                        @endif
-
-                        <br /><strong class="fas fa-user fa-sm fa-fw mr-2 text-black-400"></strong>{{ $bidCounts[$bid->product->id] ?? 0 }}<br />
-                    </div>
-
-                    <!-- Button to view the winner only if there is a winning bid -->
-                    @if(!empty($highestBids[$bid->product->id]))
-                        <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $bid->product->id }}">
-                            View Winner
-                        </button>
-                    @endif
-                </div>
-
-                <!-- Modal for displaying the winner information -->
-                <div class="modal fade" id="productModal{{ $bid->product->id }}" tabindex="-1" aria-labelledby="productModalLabel{{ $bid->product->id }}" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="productModalLabel{{ $bid->product->id }}">{{ $bid->product->product_name }}</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    @if (!empty($highestBids[$bid->product->id]))
+                        @if ($bid->product->auction_status == 'closed' || $bid->product->auction_time < now())
+                        <div class="product-card">
+                            <strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}
+                            <div id="countdownTimer{{ $bid->product->id }}" class="auction-timer" data-end-time="{{ strtotime($bid->product->auction_time) }}" data-auction-status="{{ $bid->product->auction_status }}">
+                                Loading...
                             </div>
-                            <div class="modal-body">
+
+                            @if ($bid->product->product_image)
+                                <img src="{{ asset('storage/' . $bid->product->product_image) }}" alt="{{ $bid->product->product_name }}" class="product-image" />
+                            @endif
+
+                            <div class="product-title">{{ $bid->product->product_name }}</div>
+                            <div class="product-details">
+                                <strong>Category:</strong> {{ $bid->product->category }}<br />
+                                <strong>Quantity:</strong> {{ $bid->product->quantity }}<br />
+                                <strong>Description:</strong> {{ $bid->product->description }}<br />
+                                <strong>Starting Price:</strong> {{ number_format($bid->product->starting_price, 2) }}<br />
+
                                 @if (!empty($highestBids[$bid->product->id]))
-                                <p><strong>Congratulations to:</strong>
-                                    <a href="{{ route('profile.show', $highestBids[$bid->product->id]->bidder->email) }}">
-                                        {{ $highestBids[$bid->product->id]->bidder->name }}
-                                    </a>
-                                </p>
+                                    <strong>Highest Bid:</strong> {{ $highestBids[$bid->product->id]->amount }}<br />
+
+                                    <!-- Display only if authenticated user is the auctioneer -->
+                                    @if(Auth::id() == $bid->product->auctioneer_id)
+                                        <p><strong>Bidder:</strong> {{ $highestBids[$bid->product->id]->bidder->name }}</p>
+                                    @endif
                                 @else
-                                    <p><strong>No bids for this product.</strong></p>
+                                    <strong>No bids for this product.</strong><br />
                                 @endif
+
+                                <br /><strong class="fas fa-user fa-sm fa-fw mr-2 text-black-400"></strong>{{ $bidCounts[$bid->product->id] ?? 0 }}<br />
+                            </div>
+
+                            <!-- Button to view the winner only if there is a winning bid -->
+                            @if(!empty($highestBids[$bid->product->id]))
+                                <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $bid->product->id }}">
+                                    View Winner
+                                </button>
+                            @endif
+                        </div>
+
+                        <!-- Modal for displaying the winner information -->
+                        <div class="modal fade" id="productModal{{ $bid->product->id }}" tabindex="-1" aria-labelledby="productModalLabel{{ $bid->product->id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="productModalLabel{{ $bid->product->id }}">{{ $bid->product->product_name }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                            <!-- Check if the auction is closed -->
+                                            @if($bid->product->auction_status == 'closed' || $bid->product->auction_time < now())
+                                            <!-- Display Winner -->
+                                            <h4 class="text-success mb-4">Winner</h4>
+                                            @if (!empty($highestBids[$bid->product->id]))
+                                                <p>
+                                                    <strong>Name:</strong>
+                                                    <a href="{{ route('profile.show', $highestBids[$bid->product->id]->bidder->email) }}">
+                                                        {{ $highestBids[$bid->product->id]->bidder->name }}
+                                                    </a>
+                                                </p>
+                                                <p><strong>Winning Bid:</strong> {{ number_format($highestBids[$bid->product->id]->amount, 2) }}</p>
+                                            @else
+                                                <p>No winner for this product.</p>
+                                            @endif
+
+                                            <!-- Bidding Summary Report -->
+                                            <h4 class="text-primary mt-4">Bidding Summary Report</h4>
+                                            <p><strong>Total Bids:</strong> {{ $bidCounts[$bid->product->id] ?? 0 }}</p>
+
+                                            @if (!empty($allBids[$bid->product->id]) && $allBids[$bid->product->id]->isNotEmpty())
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Bidder</th>
+                                                            <th>Bid Amount</th>
+                                                            <th>Bid Time</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($allBids[$bid->product->id] as $bid)
+                                                            <tr>
+                                                                <td>
+                                                                    <a href="{{ route('profile.show', $bid->bidder->id) }}">
+                                                                        {{ $bid->bidder->name }}
+                                                                    </a>
+                                                                </td>
+                                                                <td>{{ $bid->amount }}</td>
+                                                                <td>{{ $bid->created_at->format('d-m-Y H:i:s') }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            @else
+                                                <p>No bids for this product.</p>
+                                            @endif
+                                        @endif
+                                            <p><strong>Bidding End Time:</strong> {{ \Carbon\Carbon::parse($bid->product->auction_time)->format('d-m-Y H:i:s') }}</p>
+
+                                            @if(Auth::user()->role == 'bidder' && $highestBids[$bid->product->id]->bidder_id == Auth::id())
+                                            <div class="text-center">
+                                                <button type="submit" class="submit-button mt-3 w-50">
+                                                    <a href="{{ route('profile.show', $bid->product->auctioneer->email) }}">
+                                                        {{ 'View ' . $bid->product->auctioneer->name . ' profile' }}
+                                                    </a>
+                                                </button>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-                @endif
+                        @endif
+                    @endif
                 @endforeach
             </div>
         </div>

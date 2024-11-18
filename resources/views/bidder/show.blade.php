@@ -200,7 +200,7 @@
             <div class="product-grid">
                 @foreach ($bids as $bid)
 
-                @if ($bid->product->auction_status == 'open')
+                @if ($bid->product->auction_status == 'open' && $bid->product->auction_time > now())
 
                 <div class="product-card">
                     <strong>Created by:</strong> {{ $bid->product->auctioneer->name ?? 'Unknown' }}
@@ -265,14 +265,6 @@
                                     <div id="modalCountdownTimer{{ $bid->product->id }}" class="auction-timer d-flex justify-content-center align-items-center" style="font-size: 3rem;" data-end-time="{{ strtotime($bid->product->auction_time) }}" data-auction-status="{{ $bid->product->auction_status }}">
                                         Loading...
                                     </div>
-
-                                    @if (!empty($highestBids[$bid->product->id]) && $highestBids[$bid->product->id]->bidder)
-                                        @if ($bid->product->auction_time < now())
-                                            <p class="d-flex justify-content-center align-items-center" style="font-size: 2rem;"><strong>Winner:</strong> {{ $highestBids[$bid->product->id]->bidder->name }}</p>
-                                        @endif
-                                    @else
-                                        <p class="d-flex justify-content-center align-items-center" style="font-size: 2rem;"><strong>No bids yet</strong></p>
-                                    @endif
 
                                     <!-- Product Image -->
                                     @if (!empty($bid->product->product_image) && Storage::disk('public')->exists($bid->product->product_image))

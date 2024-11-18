@@ -94,7 +94,7 @@
                                     </button>
                                 </td>
                                 <td>
-                                    <a href="{{ route('auctioneer.end', $product->id) }}" class="btn btn-warning end-countdown-button">End Countdown</a>
+                                    <a href="{{ route('auctioneer.end', $product->id) }}" class="btn btn-warning end-countdown-button" id="end" data-product-id="{{ $product->id }}">End Countdown</a>
                                 </td>
                             </tr>
                         @endforeach

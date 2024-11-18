@@ -246,9 +246,17 @@ class BidController extends Controller
         // Initialize arrays to store the highest bids and bid counts for each product
         $highestBids = [];
         $bidCounts = [];
+        $allBids = [];
 
         // Loop through each product to find the highest bid and bid count
         foreach ($winningBids as $bid) {
+
+            // Get all bids for this product
+            $allBids[$bid->product->id] = Bid::where('product_id', $bid->product->id)
+            ->with('bidder')
+            ->orderBy('amount', 'desc')
+            ->get();
+
             // Count the total number of bids for this product
             $bidCounts[$bid->product->id] = Bid::where('product_id', $bid->product->id)->count();
 
@@ -265,7 +273,7 @@ class BidController extends Controller
         }
 
         // Pass only the authenticated user's winning bids to the view
-        return view('bidder.showAuctionWin', compact('winningBids', 'highestBids', 'bidCounts'));
+        return view('bidder.showAuctionWin', compact('winningBids', 'highestBids', 'bidCounts', 'allBids'));
     }
 
 

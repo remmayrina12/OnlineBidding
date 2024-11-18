@@ -232,7 +232,7 @@
                         </div>
 
                         <!-- Modal Trigger for Bidder and Winner -->
-                        @if($product->auction_status == 'open')
+                        @if($product->auction_status == 'open' && $product->auction_time > now())
                             @if(Auth::user()->role === "auctioneer" || Auth::user()->role === "admin")
                                 <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $product->id }}">
                                     View Product
@@ -258,7 +258,7 @@
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    @if($product->auction_status == 'open')
+                                    @if($product->auction_status == 'open' && $product->auction_time > now())
                                         @if(session('success'))
                                             <div class="alert alert-success alert-dismissible fade show" role="alert">
                                                 {{ session('success') }}
@@ -304,8 +304,8 @@
 
                                         <p>
                                             <strong>Created by:</strong>
-                                                <a href="{{ route('profile.show', $product->auctioneer->email ?? '') }}">
-                                                    {{ $product->auctioneer->name ?? 'Unknown' }}
+                                                <a href="{{ route('profile.show', $product->auctioneer->email) }}">
+                                                    {{ $product->auctioneer->name}}
                                                 </a>
                                         </p>
 
@@ -327,14 +327,63 @@
                                             @endif
                                         @endif
                                     @else
+                                    <!-- Check if the auction is closed -->
+                                    @if($product->auction_status == 'closed' || $product->auction_time < now())
+                                        <!-- Display Winner -->
+                                        <h4 class="text-success mb-4">Winner</h4>
                                         @if (!empty($highestBids[$product->id]))
-                                            <p><strong>Congratulations to:</strong>
+                                            <p>
+                                                <strong>Name:</strong>
                                                 <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->email) }}">
                                                     {{ $highestBids[$product->id]->bidder->name }}
                                                 </a>
                                             </p>
+                                            <p><strong>Winning Bid:</strong> {{ number_format($highestBids[$product->id]->amount, 2) }}</p>
                                         @else
-                                            <p><strong>No bids for this product.</strong></p>
+                                            <p>No winner for this product.</p>
+                                        @endif
+
+                                        <!-- Bidding Summary Report -->
+                                        <h4 class="text-primary mt-4">Bidding Summary Report</h4>
+                                        <p><strong>Total Bids:</strong> {{ $bidCounts[$product->id] ?? 0 }}</p>
+
+                                        @if (!empty($allBids[$product->id]) && $allBids[$product->id]->isNotEmpty())
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Bidder</th>
+                                                        <th>Bid Amount</th>
+                                                        <th>Bid Time</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($allBids[$product->id] as $bid)
+                                                        <tr>
+                                                            <td>
+                                                                <a href="{{ route('profile.show', $bid->bidder->email) }}">
+                                                                    {{ $bid->bidder->name }}
+                                                                </a>
+                                                            </td>
+                                                            <td>{{ $bid->amount }}</td>
+                                                            <td>{{ $bid->created_at->format('d-m-Y H:i:s') }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        @else
+                                            <p>No bids for this product.</p>
+                                        @endif
+                                    @endif
+                                        <p><strong>Bidding End Time:</strong> {{ \Carbon\Carbon::parse($product->auction_time)->format('d-m-Y H:i:s') }}</p>
+
+                                        @if(Auth::user()->role == 'bidder' && $highestBids[$product->id]->bidder_id == Auth::id())
+                                            <div class="text-center">
+                                                <button type="submit" class="submit-button mt-3 w-50">
+                                                    <a href="{{ route('profile.show', $product->auctioneer->email) }}">
+                                                        {{ 'View ' . $product->auctioneer->name . ' profile' }}
+                                                    </a>
+                                                </button>
+                                            </div>
                                         @endif
                                     @endif
                                 </div>
