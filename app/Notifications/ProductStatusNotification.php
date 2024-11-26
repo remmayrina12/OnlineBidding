@@ -3,7 +3,6 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -11,55 +10,29 @@ class ProductStatusNotification extends Notification
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
+    private $product;
+    private $product_post_status;
 
-    protected $status;
-    public function __construct($status)
+    public function __construct($product, $product_post_status)
     {
-        $this->status = $status;
+        $this->product = $product;
+        $this->product_post_status = $product_post_status;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+    public function via($notifiable)
     {
-        return ['mail', 'database'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-                    ->line("Your product status has been changed to {$this->status}.")
-                    ->action('View Products', route('auctioneer.index'))
-                    ->line('Thank you for using our application!');
-    }
-
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
-    {
-        return [
-            //
-        ];
+        return ['database']; // Storing in the database
     }
 
     public function toDatabase($notifiable)
     {
         return [
-            'message' => "Your product has been {$this->status}.",
-            'action_url' => url('/home'),  // Link to view the product
-            'status' => $this->status,
+            'product_id' => $this->product->product_id,
+            'product_name' => $this->product->product_name,
+            'product_post_status' => $this->product->product_post_status,
+            'message' => $this->product_post_status === 'active'
+                ? 'Your product ' . $this->product->product_name . ' has been approved and is now active.'
+                : 'Your product ' . $this->product->product_name . ' has been rejected.',
         ];
     }
 }

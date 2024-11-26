@@ -182,6 +182,34 @@
         outline-offset: 2px;
     }
 </style>
+@if(session('success'))
+<script>
+    Swal.fire({
+        title: 'Success!',
+        text: "{{ session('success') }}",
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+@if(session('failed'))
+<script>
+    Swal.fire({
+        title: 'Failed!',
+        text: "{{ session('failed') }}",
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+
+<!-- Search Form -->
+<form action="{{ route('home.show') }}" method="GET" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="query" class="form-control" placeholder="Search for products..." value="{{ request('query') }}">
+        <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+</form>
 
 <div class="category-container">
     <span class="category-label">Categories:</span>
@@ -259,18 +287,6 @@
                                 </div>
                                 <div class="modal-body">
                                     @if($product->auction_status == 'open' && $product->auction_time > now())
-                                        @if(session('success'))
-                                            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                                {{ session('success') }}
-                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                            </div>
-                                        @endif
-                                        @if(session('failed'))
-                                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                                {{ session('failed') }}
-                                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                            </div>
-                                        @endif
 
                                         <div id="modalCountdownTimer{{ $product->id }}" class="auction-timer d-flex justify-content-center align-items-center" style="font-size: 3rem;" data-end-time="{{ strtotime($product->auction_time) }}" data-auction-status="{{ $product->auction_status }}">
                                             Loading...
@@ -376,11 +392,11 @@
                                     @endif
                                         <p><strong>Bidding End Time:</strong> {{ \Carbon\Carbon::parse($product->auction_time)->format('d-m-Y H:i:s') }}</p>
 
-                                        @if(Auth::user()->role == 'bidder' && $highestBids[$product->id]->bidder_id == Auth::id())
+                                        @if(Auth::user()->role == 'bidder' && isset($highestBids[$product->id]) && $highestBids[$product->id]->bidder_id == Auth::id())
                                             <div class="text-center">
                                                 <button type="submit" class="submit-button mt-3 w-50">
                                                     <a href="{{ route('profile.show', $product->auctioneer->email) }}">
-                                                        {{ 'View ' . $product->auctioneer->name . ' profile' }}
+                                                        {{ 'View ' . $product->auctioneer->name . ' Profile' }}
                                                     </a>
                                                 </button>
                                             </div>
@@ -397,8 +413,6 @@
 </div>
 
 <script src="{{ asset('js/countdown.js') }}" defer></script>
-<script src="{{ asset('js/starting-time.js') }}" defer></script>
-
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
 

@@ -12,6 +12,26 @@
 }
 
 </style>
+@if(session('success'))
+<script>
+    Swal.fire({
+        title: 'Success!',
+        text: "{{ session('success') }}",
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+@if(session('error'))
+<script>
+    Swal.fire({
+        title: 'Error!',
+        text: "{{ session('error') }}",
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -24,12 +44,6 @@
                     <form action="{{ route('profile.update', $user->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
-
-                        @if(session('success'))
-                            <div class="alert alert-success">
-                                {{ session('success') }}
-                            </div>
-                        @endif
 
                         <!-- Profile Picture with Modal Preview -->
                         <div class="form-group text-center">
@@ -78,7 +92,7 @@
                             <input type="file" class="form-control" name="valid_id">
                         </div>
 
-                        <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+                        <button type="submit" class="btn btn-primary mt-3" onclick="return confirm('Are you sure you want to save it?')">Save Changes</button>
                     </form>
 
                     <!-- Password Update Form -->
@@ -101,7 +115,7 @@
                             <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
                         </div>
 
-                        <button type="submit" class="btn btn-warning">Change Password</button>
+                        <button type="submit" class="btn btn-warning" onclick="return confirm('Are you sure you want to change your password?')">Change Password</button>
                     </form>
                 </div>
             </div>

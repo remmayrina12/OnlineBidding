@@ -56,4 +56,45 @@ class LoginController extends Controller
             return redirect()->intended(route('bidder', absolute: false));
         }
     }
+
+    public function login(Request $request)
+    {
+        // Validate the login credentials
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+
+        // Attempt to log the user in
+        if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+            // Check if the user is banned or suspended
+            $user = Auth::user();
+            if ($user->status === 'banned') {
+                Auth::logout();
+                return redirect()->route('login')->with('error', 'Your account is banned. Contact support for assistance.');
+            }
+
+            if ($user->status === 'suspended') {
+                // Calculate the remaining suspension period
+                $remainingDays = now()->diffInDays($user->suspension_until);
+                $suspensionEnd = \Carbon\Carbon::parse($user->suspension_until)->format('F j, Y, g:i a'); // Format date and time
+
+                if ($remainingDays < 1) {
+                    $remainingDays = 1;
+                }
+
+                Auth::logout();
+                return redirect()->route('login')->with(
+                    'error',
+                    "Your account is suspended. You can log in after {$remainingDays} day(s), on {$suspensionEnd}."
+                );
+            }
+
+            // If account is active, proceed to the intended page
+            return redirect()->intended('home');
+        }
+
+        // If credentials are invalid, redirect back with an error
+        return redirect()->route('login')->with('error', 'Invalid credentials.');
+    }
 }

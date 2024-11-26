@@ -98,10 +98,29 @@ class ProfileController extends Controller
         return redirect()->route('profile.edit')->with('success', 'Password updated successfully.');
     }
 
-    public function show($email)
-    {
-        $user = User::where('email', $email)->firstOrFail();
+    public function show($email, Request $request)
+{
+    $query = $request->input('query');
 
-        return view('profile.show', compact('user'));
+    // If there is a search query, search for users
+    if ($query) {
+        $user = User::where('name', 'LIKE', "%{$query}%")
+                    ->orWhere('email', 'LIKE', "%{$query}%")
+                    ->where('email', $email)  // Ensure we're searching for the user with the provided email
+                    ->firstOrFail();
+
+        return view('profile.show', compact('user', 'query'));
     }
+
+    // If no query is provided, return the authenticated user's profile
+    if (Auth::user()->email == $email) {
+        $user = Auth::user();
+    } else {
+        // If the email does not match the logged-in user, fetch the user with the given email
+        $user = User::where('email', $email)->firstOrFail();
+    }
+
+    return view('profile.show', compact('user', 'query'));
+}
+
 }

@@ -180,6 +180,34 @@
         outline-offset: 2px;
     }
 </style>
+@if(session('success'))
+<script>
+    Swal.fire({
+        title: 'Success!',
+        text: "{{ session('success') }}",
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+@if(session('failed'))
+<script>
+    Swal.fire({
+        title: 'Failed!',
+        text: "{{ session('failed') }}",
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+
+<!-- Search Form -->
+<form action="{{ route('bidder.show') }}" method="GET" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="query" class="form-control" placeholder="Search for products..." value="{{ request('query') }}">
+        <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+</form>
 
 <div class="category-container">
     <span class="category-label">Categories:</span>
@@ -248,18 +276,6 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                    @if(session('success'))
-                                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                                            {{ session('success') }}
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                        </div>
-                                    @endif
-                                    @if(session('failed'))
-                                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                            {{ session('failed') }}
-                                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                        </div>
-                                    @endif
 
                                     <!-- Timer -->
                                     <div id="modalCountdownTimer{{ $bid->product->id }}" class="auction-timer d-flex justify-content-center align-items-center" style="font-size: 3rem;" data-end-time="{{ strtotime($bid->product->auction_time) }}" data-auction-status="{{ $bid->product->auction_status }}">

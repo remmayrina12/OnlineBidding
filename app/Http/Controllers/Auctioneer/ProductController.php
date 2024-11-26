@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Auctioneer;
 
 use Carbon\Carbon;
 use App\Models\Bid;
+use App\Models\User;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Models\ArchivedProduct;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\AuctionEndedNotification;
+use App\Notifications\ProductRequestNotification;
 
 class ProductController extends Controller
 {
@@ -69,21 +72,37 @@ class ProductController extends Controller
         $product->auctioneer_id = Auth::id();
         $product->save();
 
-        return redirect()->route('auctioneer.index')->with('success', 'Product created successfully.');
+        // Notify admins
+        $adminName = 'admin';
+        $specificAdmin = User::where('role', 'admin')->where('name', $adminName)->first(); // Replace $specificAdminId with the actual ID or condition
+        if ($specificAdmin) {
+            $specificAdmin->notify(new ProductRequestNotification($product));
+        }
+
+        // Redirect with success session
+        return redirect()->back()->with('success', 'The Product is successfully requested.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show()
+    public function show(Request $request)
     {
         $currentTime = Carbon::now(); // Current time
 
+        $query = $request->input('query');
+
         // Get all products with their auctioneer and highest bid (if necessary)
         $products = Product::where('product_post_status', '=', 'active')
-                            ->with(['auctioneer', 'bids']) // Eager load auctioneer and bids relationships
-                            ->orderBy('created_at', 'desc') // Sort in descending order
-                            ->get();
+            ->with(['auctioneer', 'bids']) // Eager load auctioneer and bids relationships
+            ->where(function($q) use($query) {
+                $q->where('product_name', 'LIKE', "%{$query}%")
+                ->orWhere('category', 'LIKE', "%{$query}%");
+            })
+            ->orderBy('auction_status', 'desc') // "closed" will be considered last as string sorting places it after "active"
+            ->orderBy('created_at', 'desc') // Secondary sorting for remaining products
+            ->get();
+
 
         // Initialize arrays to store the highest bids, and check if the user has already bid on the product
         $highestBids = $this->getHighestBidsForProducts($products);
@@ -92,7 +111,7 @@ class ProductController extends Controller
         $allBids = $this->getBidsForProducts($products);
 
         // Pass the products, highestBids, alreadyBidOn, and bidCounts to the view
-        return view('home', compact('products', 'highestBids', 'alreadyBidOn', 'bidCounts', 'allBids'));
+        return view('home', compact('products', 'highestBids', 'alreadyBidOn', 'bidCounts', 'allBids', 'query'));
     }
 
     /**
@@ -178,7 +197,7 @@ class ProductController extends Controller
         $product->forceDelete();
 
         // Redirect back to the auctioneer index page
-        return redirect()->route('auctioneer.index')->with('success', 'Product archived successfully.');
+        return redirect()->route('auctioneer.index')->with('success', 'The Product deleted successfully.');
     }
 
     public function archived()
@@ -278,8 +297,32 @@ class ProductController extends Controller
         // Update auction status to 'closed' for the specific product
         $product->update(['auction_status' => 'closed']);
 
-        // Return a success message or redirect back to the page
-        return redirect()->back()->with('success', 'Auction has been ended successfully');
-    }
+        // Get the highest bid for the product
+        $highestBid = $this->getHighestBidsForProducts([$product])[$product->id] ?? null;
 
+        if ($highestBid) {
+            // Notify the highest bidder
+            $highestBid->bidder->notify(new AuctionEndedNotification($product, 'winner'));
+
+
+        // Notify other bidders (exclude the highest bidder)
+        $otherBidders = Bid::where('product_id', $product->id)
+            ->where('bidder_id', '!=', $highestBid->bidder->id)
+            ->with('bidder')
+            ->get();
+
+        foreach ($otherBidders as $bid) {
+            $bid->bidder->notify(new AuctionEndedNotification($product, 'ended'));
+        }
+
+        // Optionally, notify the auctioneer (product owner)
+        $auctioneer = User::find($product->auctioneer_id); // Assuming `user_id` is the owner of the product
+        if ($auctioneer) {
+            $auctioneer->notify(new AuctionEndedNotification($product, 'auctioneer'));
+        }
+
+        // Return a success message or redirect back to the page
+        return redirect()->back()->with('success', 'Auction has been ended successfully, and notifications have been sent.');
+        }
+    }
 }

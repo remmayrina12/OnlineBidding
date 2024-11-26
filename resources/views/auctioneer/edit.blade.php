@@ -31,7 +31,7 @@
         margin-bottom: 0.5rem;
     }
 
-    input, textarea {
+    input, textarea, select {
         width: 100%;
         padding: 0.75rem 1rem;
         font-size: 1rem;
@@ -43,7 +43,7 @@
         transition: border-color 0.3s, box-shadow 0.3s;
     }
 
-    input:focus, textarea:focus {
+    input:focus, textarea:focus, select:focus {
         border-color: #6366f1; /* Indigo Focus */
         box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
         outline: none;
@@ -74,13 +74,6 @@
         background-color: #1d4ed8; /* Even Darker Blue */
         transform: translateY(0);
     }
-
-    /* Media Queries for responsiveness */
-    @media (min-width: 640px) {
-        .form-container {
-            padding: 3rem;
-        }
-    }
 </style>
 
 <div class="py-12">
@@ -95,48 +88,70 @@
                 <!-- Category -->
                 <div class="form-group mb-3">
                     <label for="category" class="form-label">{{ __('Category') }}</label>
-                    <select name="category" id="category" value="{{ $product->category}}" class="form-select" required>
-                        <option value="Corn">{{ __('Corns') }}</option>
-                        <option value="Grains">{{ __('Grains') }}</option>
+                    <select name="category" id="category" class="form-select" required>
+                        <option value="Corn" {{ old('category', $product->category) == 'Corn' ? 'selected' : '' }}>{{ __('Corns') }}</option>
+                        <option value="Grains" {{ old('category', $product->category) == 'Grains' ? 'selected' : '' }}>{{ __('Grains') }}</option>
                     </select>
                 </div>
 
                 <!-- Product Name -->
                 <div class="form-group mb-3">
                     <label for="product_name" class="form-label">{{ __('Product Name') }}</label>
-                    <select name="product_name" id="product_name" value="{{ $product->product_name}}" class="form-select" required>
-                        <!-- Initially empty options will be populated based on selected category -->
+                    <select name="product_name" id="product_name" class="form-select" required>
+                        <!-- Options populated dynamically using JavaScript -->
                     </select>
                 </div>
 
                 <!-- Quantity -->
                 <div class="form-group">
                     <label for="quantity">{{ __('Quantity') }}</label>
-                    <input type="number" name="quantity" value="{{ $product->quantity}}" id="quantity" required>
+                    <input
+                        type="number"
+                        name="quantity"
+                        id="quantity"
+                        value="{{ old('quantity', $product->quantity) }}"
+                        required>
                 </div>
 
                 <!-- Description -->
                 <div class="form-group">
                     <label for="description">{{ __('Description') }}</label>
-                    <textarea name="description" id="description" value="{{ $product->description}}" rows="3" required></textarea>
+                    <textarea
+                        name="description"
+                        id="description"
+                        rows="3"
+                        required>{{ old('description', $product->description) }}</textarea>
                 </div>
 
                 <!-- Image -->
                 <div class="form-group">
                     <label for="product_image">{{ __('Product Image') }}</label>
-                    <input type="file" name="product_image" value="{{ $product->product_image}}" id="product_image" accept="image/*">
+                    @if($product->product_image)
+                        <img src="{{ asset('storage/' . $product->product_image) }}" alt="Product Image" class="img-thumbnail mt-2" width="150">
+                    @endif
+                    <input
+                        type="file"
+                        name="product_image"
+                        id="product_image"
+                        accept="image/*">
                 </div>
 
                 <!-- Starting Price -->
                 <div class="form-group">
                     <label for="starting_price">{{ __('Starting Price') }}</label>
-                    <input type="number" step="0.01" name="starting_price" value="{{ $product->starting_price}}" id="starting_price" required>
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="starting_price"
+                        id="starting_price"
+                        value="{{ old('starting_price', $product->starting_price) }}"
+                        required>
                 </div>
 
                 <!-- Submit Button -->
                 <div class="form-group text-center">
-                    <button type="submit" class="submit-button">
-                        {{ __('Create Product') }}
+                    <button type="submit" class="submit-button" onclick="return confirm('Are you sure you want to update this product?')">
+                        {{ __('Update Product') }}
                     </button>
                 </div>
             </form>
@@ -147,30 +162,33 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    document.getElementById('category').addEventListener('change', function() {
-        var category = this.value;
-        var productSelect = document.getElementById('product_name');
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoryElement = document.getElementById('category');
+        const productNameElement = document.getElementById('product_name');
 
-        // Clear previous options
-        productSelect.innerHTML = '';
+        const productsByCategory = {
+            Corn: ['NK6130', 'NK6410', 'NK6410 VIP', 'NK6414', 'NK6505', 'NK8840', 'NK8840 VIP', 'DK6919S', 'DK8131S', 'DK8899S', 'DK8282S', 'DK9118S'],
+            Grains: ['NK5017', 'RH 9000', 'S6003']
+        };
 
-        // Add new options based on selected category
-        if (category === 'Corn') {
-            var products = ['NK6130', 'NK6410', 'NK6410 VIP', 'NK6414', 'NK6505', 'NK8840', 'NK8840 VIP', 'DK6919S', 'DK8131S', 'DK8899S', 'DK8282S', 'DK9118S'];
-        } else if (category === 'Grains') {
-            var products = ['NK5017', 'RH 9000', 'S6003'];
+        function populateProductNames() {
+            const selectedCategory = categoryElement.value;
+            const products = productsByCategory[selectedCategory] || [];
+            productNameElement.innerHTML = '';
+
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product;
+                option.textContent = product;
+                option.selected = product === "{{ old('product_name', $product->product_name) }}";
+                productNameElement.appendChild(option);
+            });
         }
 
-        // Append options to product dropdown
-        products.forEach(function(product) {
-            var option = document.createElement('option');
-            option.value = product;
-            option.textContent = product;
-            productSelect.appendChild(option);
-        });
-    });
+        categoryElement.addEventListener('change', populateProductNames);
 
-    // Trigger change event on page load to populate product options based on the default category
-    document.getElementById('category').dispatchEvent(new Event('change'));
+        // Trigger change event on page load to populate options
+        populateProductNames();
+    });
 </script>
 @endsection

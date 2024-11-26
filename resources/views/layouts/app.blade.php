@@ -22,10 +22,63 @@
     <!-- Custom styles for this template-->
     <link href="{{ url('assets/css/sb-admin-2.min.css') }}" rel="stylesheet">
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+
+<style>
+    /* Dropdown Menu Styling */
+    #alertsDropdown {
+        position: relative;
+    }
+
+    /* Max height and scroll for dropdown */
+    .dropdown-menu {
+        max-height: 300px;
+        overflow-y: auto;
+        width: 350px; /* Adjust the width to fit the message */
+    }
+
+    /* Notification Icon Circle */
+    .icon-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Badge for unread notifications */
+    .badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        font-size: 0.75rem;
+    }
+
+    /* Dividers between notification items */
+    .dropdown-divider {
+        border-color: #ddd;
+    }
+
+    /* Centered "No new notifications" text */
+    .text-muted {
+        font-size: 14px;
+    }
+
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+        .dropdown-menu {
+            width: 100%;
+        }
+    }
+</style>
 </head>
+
 <body>
     <div id="app">
         <body id="page-top">
@@ -57,6 +110,12 @@
                         <a class="nav-link" href="{{ route('profile.show', Auth::user()->email) }}">
                             <i class="fas fa-fw fa-tachometer-alt"></i>
                             <span>View Profile</span></a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('notifications.index') }}">
+                            <i class="fas fa-fw fa-tachometer-alt"></i>
+                            <span>Your Notifications</span></a>
                     </li>
 
                     <!-- Auctioneer -->
@@ -175,6 +234,12 @@
                                 </div>
                             </div>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('reportIndex.index') }}">
+                                <i class="fas fa-fw fa-tachometer-alt"></i>
+                                <span>Reports</span></a>
+                        </li>
                     @endif
 
                     <!-- Divider -->
@@ -201,20 +266,6 @@
                             <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
                                 <i class="fa fa-bars"></i>
                             </button>
-
-                            <!-- Topbar Search -->
-                            <form
-                                class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
-                                <div class="input-group">
-                                    <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..."
-                                        aria-label="Search" aria-describedby="basic-addon2">
-                                    <div class="input-group-append">
-                                        <button class="btn btn-primary" type="button">
-                                            <i class="fas fa-search fa-sm"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
 
                             <!-- Topbar Navbar -->
                             <ul class="navbar-nav ml-auto">
@@ -243,39 +294,45 @@
                                     </div>
                                 </li>
 
-                                <!-- Nav Item - Alerts -->
+                                <!-- Nav Item - Notification alerts -->
                                 <li class="nav-item dropdown no-arrow mx-1">
                                     <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
-                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                         <i class="fas fa-bell fa-fw"></i>
                                         <!-- Counter - Alerts -->
-                                        <span class="badge badge-danger badge-counter">3+</span>
+                                        <span class="badge bg-danger">{{ Auth::user()->unreadNotifications->count() }}</span>
                                     </a>
+
                                     <!-- Dropdown - Alerts -->
-                                    <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                    <ul class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
                                         aria-labelledby="alertsDropdown">
-                                        <h6 class="dropdown-header">
-                                            Alerts Center
-                                        </h6>
-                                    </div>
+
+                                        @if(Auth::user()->unreadNotifications->isEmpty())
+                                            <li class="text-center p-2">
+                                                <span class="text-muted">No new notifications</span>
+                                            </li>
+                                        @else
+                                            @foreach(Auth::user()->unreadNotifications as $notification)
+                                                <li>
+                                                    <a class="dropdown-item d-flex align-items-center"
+                                                        href="{{ route('notifications.markAsRead', $notification->id) }}">
+                                                        <div class="me-3">
+                                                            <div class="icon-circle bg-primary">
+                                                                <i class="fas fa-info text-white"></i>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <span class="font-weight-bold">{{ $notification->data['message'] }}</span>
+                                                            <div class="small text-gray-500">{{ $notification->created_at->diffForHumans() }}</div>
+                                                        </div>
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                            @endforeach
+                                        @endif
+                                    </ul>
                                 </li>
 
-                                <!-- Nav Item - Messages -->
-                                <li class="nav-item dropdown no-arrow mx-1">
-                                    <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
-                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-envelope fa-fw"></i>
-                                        <!-- Counter - Messages -->
-                                        <span class="badge badge-danger badge-counter">7</span>
-                                    </a>
-                                    <!-- Dropdown - Messages -->
-                                    <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                        aria-labelledby="messagesDropdown">
-                                        <h6 class="dropdown-header">
-                                            Message Center
-                                        </h6>
-                                    </div>
-                                </li>
 
                                 <div class="topbar-divider d-none d-sm-block"></div>
 

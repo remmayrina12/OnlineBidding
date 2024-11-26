@@ -40,14 +40,47 @@
         color: #ffcc00;
     }
 </style>
+@if(session('success'))
+<script>
+    Swal.fire({
+        title: 'Success!',
+        text: "{{ session('success') }}",
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+@if(session('error'))
+<script>
+    Swal.fire({
+        title: 'Error!',
+        text: "{{ session('error') }}",
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
 
 <div class="container">
-    <h1>User Profile</h1>
+<!-- Search Form -->
+<form action="{{ route('profile.show', $user->email ?? Auth::user()->email) }}" method="GET" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="query" class="form-control" placeholder="Search for users..." value="{{ request('query') }}">
+        <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+</form>
+
+    <h1>{{ ucfirst($user->role) }} Profile</h1>
 
     <div class="card">
         <div class="card-body">
             <!-- Profile Picture -->
             <div class="mb-4 text-center">
+                <div class="mb-4 text-right">
+                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportModal">
+                        Report User
+                    </button>
+                </div>
                 @if($user->info && $user->info->profile_picture)
                                     <!-- Thumbnail image with a click event to open modal -->
                                     <a href="#" data-toggle="modal" data-target="#profilePictureModal">
@@ -108,7 +141,7 @@
                     <textarea name="feedback" id="feedback" class="form-control" rows="3" placeholder="Leave your feedback..."></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Submit Rating</button>
+                <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to submit it?')">Submit Rating</button>
 
             </form>
         @endif
@@ -123,7 +156,7 @@
                                 alt="Rater's Picture"
                                 style="width: 40px; height: 40px;">
                         @else
-                            <img src="{{ asset('assets/default-avatar.png') }}"
+                            <img src="{{ asset('assets/—Pngtree—vector add user icon_4101348.png') }}"
                                 class="rounded-circle mr-3"
                                 alt="Default Avatar"
                                 style="width: 40px; height: 40px;">
@@ -150,5 +183,30 @@
             @endforeach
         </ul>
     @endif
+</div>
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ route('reports.store') }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel">Report User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="reported_user_id" value="{{ $user->id }}">
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason</label>
+                        <textarea class="form-control" name="reason" id="reason" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to report this user?')">Submit Report</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection

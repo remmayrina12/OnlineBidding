@@ -18,6 +18,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('role')->default('bidder');
             $table->string('password');
+            $table->enum('status', ['active', 'suspended', 'banned'])->default('active');
+            $table->timestamp('suspension_until')->nullable(); // Suspension end date
             $table->rememberToken();
             $table->timestamps();
         });

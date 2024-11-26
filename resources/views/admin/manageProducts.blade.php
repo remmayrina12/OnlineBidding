@@ -38,26 +38,32 @@
         margin-top: 1.5rem;
     }
 </style>
+@if(session('success'))
+<script>
+    Swal.fire({
+        title: 'Success!',
+        text: "{{ session('success') }}",
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+@if(session('failed'))
+<script>
+    Swal.fire({
+        title: 'Rejected!',
+        text: "{{ session('failed') }}",
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
 
 <div class="py-12">
     <div class="container">
         <div class="card">
             <div class="card-body">
                 <h3 class="card-title mb-4">{{ __("List of Auctions!") }}</h3>
-
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-                @if(session('failed'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        {{ session('failed') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
                 <!-- Check if there are any products -->
                 @if ($manages->isEmpty())
                     <p>{{ __("Auctioneer hasn't created any products yet.") }}</p>
@@ -95,10 +101,10 @@
                                 <td>{{ $manage->starting_price }}</td>
                                 <td>{{ $manage->product_post_status }}</td>
                                 <td>
-                                    <a href="{{route('admin.acceptProduct', $manage->id)}}" class="btn btn-outline-secondary">Accept</a>
+                                    <a href="{{route('admin.acceptProduct', $manage->id)}}" class="btn btn-outline-secondary" onclick="return confirm('Are you sure you want to accept this product?')">Accept</a>
                                 </td>
                                 <td>
-                                    <a href="{{route('admin.rejectProduct', $manage->id)}}" class="btn btn-outline-primary">Reject</a>
+                                    <a href="{{route('admin.rejectProduct', $manage->id)}}" class="btn btn-outline-primary" onclick="return confirm('Are you sure you want to reject this product?')">Reject</a>
                                 </td>
                             </tr>
                         @endforeach

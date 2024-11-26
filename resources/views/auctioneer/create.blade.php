@@ -83,6 +83,17 @@
     }
 </style>
 
+@if(session('success'))
+<script>
+    Swal.fire({
+        title: 'Success!',
+        text: "{{ session('success') }}",
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
+
 <div class="py-12">
     <div class="max-w-md mx-auto sm:px-6 lg:px-8">
         <div class="form-container">
@@ -134,7 +145,7 @@
 
                 <!-- Submit Button -->
                 <div class="form-group text-center">
-                    <button type="submit" class="submit-button">
+                    <button type="submit" class="submit-button" onclick="return confirm('Are you sure you want to create this product?')">
                         {{ __('Create Product') }}
                     </button>
                 </div>

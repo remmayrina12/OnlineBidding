@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Notifications\ProductNotifyToAllBidders;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Product;
@@ -80,16 +81,34 @@ class ManageProductController extends Controller
         $data->auction_status = 'open';
         $data->save();
 
-        return redirect()->back()->with('success', 'Product post status is change to active.');
+        // Notify the specific user (product owner) after the product is accepted
+        $auctioneer = User::find($data->auctioneer_id); // Assuming `user_id` is the owner of the product
+        if ($auctioneer) {
+            $auctioneer->notify(new ProductStatusNotification($data, 'active'));
+        }
+
+        $bidders = User::where('role', 'bidder')->get();
+        foreach($bidders as $bidder){
+            $bidder->notify(new ProductNotifyToAllBidders($data));
+        }
+
+        return redirect()->back()->with('success', 'The Product is activated.');
     }
 
     public function rejectProduct(string $id)
-    {
+        {
         $data = Product::find($id);
         $data->product_post_status = 'reject';
-        $data->closed_at = now();
+        $data->auction_status = 'closed';
         $data->save();
 
-        return redirect()->back()->with('failed', 'Product post status is change to rejected.');
-    }
+        // Notify the user after the product is rejected
+        $auctioneer = User::find($data->auctioneer_id); // Assuming `user_id` is the owner of the product
+        if ($auctioneer) {
+            $auctioneer->notify(new ProductStatusNotification($data, 'reject'));
+        }
+
+
+        return redirect()->back()->with('failed', 'The Product is rejected.');
+        }
 }

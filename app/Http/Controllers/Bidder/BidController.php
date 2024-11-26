@@ -7,6 +7,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\OutbidNotification;
 
 class BidController extends Controller
 {
@@ -38,24 +39,26 @@ class BidController extends Controller
 
         // Get the highest bid for this product
         $highestBid = Bid::where('product_id', $request->product_id)->max('amount');
+        // Get the current highest bidder
+        $previousHighestBid = Bid::where('product_id', $request->product_id)
+            ->where('amount', $highestBid)
+            ->first();
+
         // Create the new bid
         $bid = new Bid;
         $bid->product_id = $request->product_id;
         $bid->bidder_id = Auth::id();
         $bid->amount = $request->amount;
 
-
         $product = Product::find($request->product_id);
         // Check if the auction time has passed
         if (now() > $product->auction_time) {
-            session()->flash('failed', 'Bidding has closed for this product.');
-            return redirect()->back();
+            return redirect()->back()->with('failed', 'Bidding has been closed for this product.');
         }
 
         // Check if the bid amount is lower than the auctioneer's starting price
         if ($request->amount < $product->starting_price) {
-            session()->flash('failed', 'Your bid must be higher than the starting price of ' . number_format($product->starting_price, 2));
-            return redirect()->back();
+            return redirect()->back()->with('failed', 'Your bid must be higher than the starting price of ' . number_format($product->starting_price, 2));
         }
 
         // Check if the new bid is higher than the current highest bid
@@ -65,28 +68,41 @@ class BidController extends Controller
             $bid->highest_bid = $request->amount;
             $bid->save();
 
-            session()->flash('success', 'Your bid was successfully placed!');
-            return redirect()->route('bidder.show');
+            // Notify the previous highest bidder that they have been outbid
+            if ($previousHighestBid) {
+                $previousHighestBid->bidder->notify(new OutbidNotification($product, $request->amount));
+            }
+
+            return redirect()->route('bidder.show')->with('success', 'Your bid was successfully placed!');
         } else {
             // If the new bid is lower or equal to the highest bid, return an error response
             session()->flash('failed', 'Your bid must be higher than the current highest bid of ' . number_format($highestBid, 2));
-            return redirect()->back();
+            return redirect()->back()->with('failed', 'Your bid must be higher than the current highest bid of ' . number_format($highestBid, 2));
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show()
+    public function show(Request $request)
     {
         // Get the currently authenticated user
         $user = Auth::user();
 
+        // Get the search query from the request
+        $query = $request->input('query');
+
         // Fetch bids that the current user has placed
         $bids = Bid::with('product')
             ->where('bidder_id', $user->id) // Only get the bids by this user
+            ->whereHas('product', function ($q) use ($query) {
+                if ($query) {
+                    $q->where('product_name', 'LIKE', "%{$query}%")
+                    ->orWhere('category', 'LIKE', "%{$query}%"); // Search products by name
+                }
+            })
             ->orderBy('created_at', 'desc') // Sort in descending order
-            ->get();
+            ->paginate(10); // Add pagination
 
         // Initialize an array to store the highest bids for each product
         $highestBids = [];
@@ -94,7 +110,6 @@ class BidController extends Controller
 
         // Loop through each bid to find the highest bid for the associated product
         foreach ($bids as $bid) {
-
             // Count the total number of bids for this product
             $bidCounts[$bid->product->id] = Bid::where('product_id', $bid->product->id)->count();
 
@@ -108,8 +123,8 @@ class BidController extends Controller
             $highestBids[$bid->product->id] = $highestBid;
         }
 
-        // Pass the filtered bids and highest bids to the view
-        return view('bidder.show', compact('bids', 'highestBids', 'bidCounts'));
+        // Pass the filtered bids, highest bids, and bid counts to the view
+        return view('bidder.show', compact('bids', 'highestBids', 'bidCounts', 'query'));
     }
 
 
@@ -135,6 +150,11 @@ class BidController extends Controller
         // Get the highest bid for this product
         $highestBid = Bid::where('product_id', $request->product_id)->max('amount');
 
+        // Get the current highest bidder
+        $previousHighestBid = Bid::where('product_id', $request->product_id)
+            ->where('amount', $highestBid)
+            ->first();
+
         // Find the current bid for this user on the product (if exists)
         $bid = Bid::where('product_id', $request->product_id)
                     ->where('bidder_id', Auth::id())
@@ -151,14 +171,12 @@ class BidController extends Controller
 
         // Check if the auction time has passed
         if (now() > $product->auction_time) {
-            session()->flash('failed', 'Bidding has closed for this product.');
-            return redirect()->back();
+            return redirect()->back()->with('failed', 'Bidding has been closed for this product.');
         }
 
         // Check if the bid amount is lower than the auctioneer's starting price
         if ($request->amount < $product->starting_price) {
-            session()->flash('failed', 'Your bid must be higher than the starting price of ' . number_format($product->starting_price, 2));
-            return redirect()->back();
+            return redirect()->back()->with('failed', 'Your bid must be higher than the starting price of ' . number_format($product->starting_price, 2));
         }
 
         // Check if the new bid is higher than the current highest bid
@@ -167,12 +185,15 @@ class BidController extends Controller
             $bid->amount = $request->amount;
             $bid->save();
 
-            session()->flash('success', 'Your bid was successfully placed!');
-            return redirect()->back();
+        // Notify the previous highest bidder that they have been outbid
+        if ($previousHighestBid) {
+            $previousHighestBid->bidder->notify(new OutbidNotification($product, $request->amount));
+        }
+
+            return redirect()->back()->with('success', 'Your bid was successfully placed!');
         } else {
             // If the new bid is lower or equal to the highest bid, return an error response
-            session()->flash('failed', 'Your bid must be higher than the current highest bid of ' . number_format($highestBid, 2));
-            return redirect()->back();
+            return redirect()->back()->with('failed', 'Your bid must be higher than the current highest bid of ' . number_format($highestBid, 2));
         }
 
     }
@@ -226,7 +247,6 @@ class BidController extends Controller
         return view('bidder.show', compact('products', 'bids', 'highestBids', 'bidCounts', 'category'));
     }
 
-
     public function showAuctionWin()
     {
         $user = Auth::user();
@@ -275,6 +295,4 @@ class BidController extends Controller
         // Pass only the authenticated user's winning bids to the view
         return view('bidder.showAuctionWin', compact('winningBids', 'highestBids', 'bidCounts', 'allBids'));
     }
-
-
 }

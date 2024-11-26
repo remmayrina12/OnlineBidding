@@ -39,6 +39,16 @@
     }
 
 </style>
+@if(session('success'))
+<script>
+    Swal.fire({
+        title: 'Success!',
+        text: "{{ session('success') }}",
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
+</script>
+@endif
 
 <div class="py-12">
     <div class="container">
@@ -94,7 +104,19 @@
                                     </button>
                                 </td>
                                 <td>
-                                    <a href="{{ route('auctioneer.end', $product->id) }}" class="btn btn-warning end-countdown-button" id="end" data-product-id="{{ $product->id }}">End Countdown</a>
+                                    @if ($product->auction_time <= now() || $product->auction_status == 'closed')
+                                        <button class="btn btn-warning end-countdown-button" disabled>
+                                            End Countdown
+                                        </button>
+                                    @else
+                                        <a href="{{ route('auctioneer.end', $product->id) }}"
+                                            class="btn btn-warning end-countdown-button"
+                                            id="end"
+                                            data-product-id="{{ $product->id }}"
+                                            onclick="return confirm('Are you sure you want to end this product?')">
+                                            End Countdown
+                                        </a>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -152,13 +174,13 @@
                     <!-- Edit Form -->
                     <form action="{{ route('auctioneer.edit', $product->id) }}" method="GET" class="d-inline">
                         @csrf
-                        <button type="submit" class="btn btn-primary">Edit</button>
+                        <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to edit this product?')"">Edit</button>
                     </form>
                     <!-- Delete Form -->
                     <form action="{{ route('auctioneer.destroy', $product->id) }}" method="POST" class="d-inline">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">Delete</button>
                     </form>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
