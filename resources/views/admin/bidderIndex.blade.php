@@ -72,20 +72,20 @@
                                         </button>
                                     </form>
 
+                                    <form action="{{ route('users.unsuspend', $user->id) }}" method="POST" style="display: inline;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success"
+                                            onclick="return confirm('Are you sure you want to ban this user?')">
+                                            Unsuspend
+                                        </button>
+                                    </form>
+
                                     <!-- Ban User -->
                                     <form action="{{ route('users.ban', $user->id) }}" method="POST" style="display: inline;">
                                         @csrf
                                         <button type="submit" class="btn btn-danger"
                                             onclick="return confirm('Are you sure you want to ban this user?')">
                                             Ban
-                                        </button>
-                                    </form>
-
-                                    <form action="{{ route('users.unsuspend', $user->id) }}" method="POST" style="display: inline;">
-                                        @csrf
-                                        <button type="submit" class="btn btn-success"
-                                            onclick="return confirm('Are you sure you want to ban this user?')">
-                                            Unsuspend
                                         </button>
                                     </form>
 

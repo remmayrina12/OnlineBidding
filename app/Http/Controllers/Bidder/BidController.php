@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Bidder;
 
+use Carbon\Carbon;
 use App\Models\Bid;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -52,7 +53,7 @@ class BidController extends Controller
 
         $product = Product::find($request->product_id);
         // Check if the auction time has passed
-        if (now() > $product->auction_time) {
+        if (Carbon::now() > $product->auction_time) {
             return redirect()->back()->with('failed', 'Bidding has been closed for this product.');
         }
 
@@ -69,9 +70,11 @@ class BidController extends Controller
             $bid->save();
 
             // Notify the previous highest bidder that they have been outbid
-            if ($previousHighestBid) {
-                $previousHighestBid->bidder->notify(new OutbidNotification($product, $request->amount));
-            }
+            // Notify the previous highest bidder that they have been outbid
+        if ($previousHighestBid && $previousHighestBid->bidder_id !== Auth::id()) {
+            $previousHighestBid->bidder->notify(new OutbidNotification($product, $request->amount));
+        }
+
 
             return redirect()->route('bidder.show')->with('success', 'Your bid was successfully placed!');
         } else {
@@ -170,7 +173,7 @@ class BidController extends Controller
         $product = Product::find($request->product_id);
 
         // Check if the auction time has passed
-        if (now() > $product->auction_time) {
+        if (Carbon::now() > $product->auction_time) {
             return redirect()->back()->with('failed', 'Bidding has been closed for this product.');
         }
 
@@ -186,7 +189,7 @@ class BidController extends Controller
             $bid->save();
 
         // Notify the previous highest bidder that they have been outbid
-        if ($previousHighestBid) {
+        if ($previousHighestBid && $previousHighestBid->bidder_id !== Auth::id()) {
             $previousHighestBid->bidder->notify(new OutbidNotification($product, $request->amount));
         }
 

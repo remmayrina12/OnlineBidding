@@ -225,14 +225,15 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
             <h1 class="text-3xl font-bold mb-6">Products List</h1>
-
             <!-- Product Grid -->
             <div class="product-grid">
                 @foreach ($products as $product)
                     <div class="product-card">
                         <strong>Created by:</strong> {{ $product->auctioneer->name ?? 'Unknown' }}
 
-                        <div id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}" data-auction-status="{{ $product->auction_status }}">
+                        <div id="countdownTimer{{ $product->id }}" class="auction-timer"
+                            data-end-time="{{ strtotime($product->auction_time) }}"
+                            data-auction-status="{{ $product->auction_status }}">
                             Loading...
                         </div>
 
@@ -411,8 +412,6 @@
         </div>
     </div>
 </div>
-
-<script src="{{ asset('js/countdown.js') }}" defer></script>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
 

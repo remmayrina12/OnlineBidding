@@ -22,7 +22,16 @@
                     <td>{{ $report->reason }}</td>
                     <td>{{ $report->status }}</td>
                     <td>
-                        <a href="{{ route('reports.updateStatus', $report->id)}}" class="btn btn-outline-secondary">Review</a>
+                        @if ($report->status == 'reviewed')
+                            <button class="btn btn-outline-secondary" disabled>
+                                Review
+                            </button>
+                        @else
+                            <a href="{{ route('reports.updateStatus', $report->id)}}"
+                                class="btn btn-outline-secondary">
+                                Review
+                            </a>
+                        @endif
                     </td>
                 </tr>
             @endforeach

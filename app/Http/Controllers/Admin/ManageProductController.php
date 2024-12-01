@@ -77,7 +77,7 @@ class ManageProductController extends Controller
     {
         $data = Product::find($id);
         $data->product_post_status = 'active';
-        $data->auction_time = Carbon::now()->addHour();
+        $data->auction_time = Carbon::now()->addMinutes(1);
         $data->auction_status = 'open';
         $data->save();
 

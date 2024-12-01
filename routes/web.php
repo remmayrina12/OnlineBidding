@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Bidder\BidController;
@@ -51,7 +52,7 @@ Route::middleware(['auth', 'checkStatus'])->group(function () {
         Route::delete('/auctioneer/destroy/{id}', [ProductController::class, 'destroy'])->name('auctioneer.destroy');
         Route::get('/auctioneer/archived', [ProductController::class, 'archived'])->name('auctioneer.archived');
 
-        Route::get('/auctioneer/end/{product}', [ProductController::class, 'end'])->name('auctioneer.end');
+        Route::post('/auctioneer/end/{product}', [ProductController::class, 'end'])->name('auctioneer.end');
     });
 
     // Bidder Routes
@@ -82,12 +83,24 @@ Route::middleware(['auth', 'checkStatus'])->group(function () {
 
     });
 
+    // Route::get('/chat/{userId}', function ($userId) {
+    //     return view('profile.chat', ['userId' => $userId]);
+    // })->middleware('auth');
+
     //Profile Routes
     Route::middleware('auth')->group(function () {
         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile/update/{userId}', [ProfileController::class, 'update'])->name('profile.update');
         Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
         Route::get('/profile/show/{email}', [ProfileController::class, 'show'])->name('profile.show');
+        // Route::get('/profile/messages/{user}', [MessageController::class, 'index'])->name('profile.messages.index');
+        // Route::post('/profile/messages', [MessageController::class, 'store'])->name('profile.messages.store');
+    });
+
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/chat', [MessageController::class, 'index'])->name('chat.index');
+        Route::post('/chat/send', [MessageController::class, 'send'])->name('chat.send');
+        Route::get('/chat/messages/{receiverId}', [MessageController::class, 'fetchMessages'])->name('chat.messages');
     });
 
     //Rating Routes

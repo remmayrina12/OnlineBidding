@@ -76,11 +76,13 @@
         <div class="card-body">
             <!-- Profile Picture -->
             <div class="mb-4 text-center">
-                <div class="mb-4 text-right">
-                    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportModal">
-                        Report User
-                    </button>
-                </div>
+                @if(Auth::check() && Auth::id() !== $user->id) <!-- Check if the user is authenticated and not viewing their own profile -->
+                    <div class="mb-4 text-right">
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportModal">
+                            Report User
+                        </button>
+                    </div>
+                @endif
                 @if($user->info && $user->info->profile_picture)
                                     <!-- Thumbnail image with a click event to open modal -->
                                     <a href="#" data-toggle="modal" data-target="#profilePictureModal">
@@ -99,6 +101,11 @@
 
             <!-- Contact Number -->
             <p class="card-text"><strong>Contact Number:</strong> {{ $user->info->contact_number ?? 'No contact number provided.' }}</p>
+            @if(Auth::check() && Auth::id() !== $user->id)
+                <div class="d-flex justify-content-end">
+                    <a href="{{ route('chat.index') }}" class="btn btn-primary">Message</a>
+                </div>
+            @endif
         </div>
     </div>
 

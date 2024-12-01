@@ -7,7 +7,9 @@ use App\Models\Bid;
 use App\Models\User;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use App\Jobs\NotifyAuctionEnd;
 use App\Models\ArchivedProduct;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -89,20 +91,18 @@ class ProductController extends Controller
     public function show(Request $request)
     {
         $currentTime = Carbon::now(); // Current time
-
         $query = $request->input('query');
 
         // Get all products with their auctioneer and highest bid (if necessary)
         $products = Product::where('product_post_status', '=', 'active')
             ->with(['auctioneer', 'bids']) // Eager load auctioneer and bids relationships
-            ->where(function($q) use($query) {
+            ->where(function($q) use ($query) {
                 $q->where('product_name', 'LIKE', "%{$query}%")
                 ->orWhere('category', 'LIKE', "%{$query}%");
             })
             ->orderBy('auction_status', 'desc') // "closed" will be considered last as string sorting places it after "active"
             ->orderBy('created_at', 'desc') // Secondary sorting for remaining products
             ->get();
-
 
         // Initialize arrays to store the highest bids, and check if the user has already bid on the product
         $highestBids = $this->getHighestBidsForProducts($products);
@@ -113,6 +113,7 @@ class ProductController extends Controller
         // Pass the products, highestBids, alreadyBidOn, and bidCounts to the view
         return view('home', compact('products', 'highestBids', 'alreadyBidOn', 'bidCounts', 'allBids', 'query'));
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -190,7 +191,7 @@ class ProductController extends Controller
             'auction_status' => $product->auction_status,
             'auctioneer_id' => $product->auctioneer_id,
             'product_post_status' => $product->product_post_status,
-            'archived_at' => now(),
+            'archived_at' => Carbon::now(),
         ]);
 
         // Permanently delete the product from the products table
@@ -292,7 +293,7 @@ class ProductController extends Controller
         return view('home', compact('products', 'highestBids', 'alreadyBidOn', 'bidCounts', 'category'));
     }
 
-    public function end(Product $product)
+    public function end(Product $product, Request $request)
     {
         // Update auction status to 'closed' for the specific product
         $product->update(['auction_status' => 'closed']);
@@ -319,6 +320,12 @@ class ProductController extends Controller
         $auctioneer = User::find($product->auctioneer_id); // Assuming `user_id` is the owner of the product
         if ($auctioneer) {
             $auctioneer->notify(new AuctionEndedNotification($product, 'auctioneer'));
+        }
+
+        // Check if the request is programmatic
+        if ($request->query('trigger') === 'programmatic') {
+            // Do not flash the success session
+            return redirect()->back();
         }
 
         // Return a success message or redirect back to the page

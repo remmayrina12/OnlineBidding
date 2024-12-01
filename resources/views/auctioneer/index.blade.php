@@ -104,14 +104,14 @@
                                     </button>
                                 </td>
                                 <td>
-                                    @if ($product->auction_time <= now() || $product->auction_status == 'closed')
+                                    @if ($product->auction_status == 'closed')
                                         <button class="btn btn-warning end-countdown-button" disabled>
                                             End Countdown
                                         </button>
                                     @else
-                                        <a href="{{ route('auctioneer.end', $product->id) }}"
-                                            class="btn btn-warning end-countdown-button"
-                                            id="end"
+                                        <a id="end-button-{{ $product->id }}"
+                                            href="{{ route('auctioneer.end', $product->id) }}"
+                                            class="btn btn-warning btn-outline-light end-countdown-button"
                                             data-product-id="{{ $product->id }}"
                                             onclick="return confirm('Are you sure you want to end this product?')">
                                             End Countdown
@@ -188,7 +188,5 @@
         </div>
     </div>
 @endforeach
-
-<script src="{{ asset('js/countdown.js') }}" defer></script>
 
 @endsection

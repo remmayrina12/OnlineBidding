@@ -31,7 +31,6 @@ class Product extends Model
         return $this->auction_time ? Carbon::parse($this->auction_time)->addHour() : null;
     }
 
-
     public function auctioneer()
     {
         return $this->belongsTo(User::class, 'auctioneer_id');

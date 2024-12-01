@@ -3,9 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class Authenticate
 {
@@ -34,9 +34,9 @@ class Authenticate
                     Log::info("User suspension status updated: " . ($updated ? 'Success' : 'Failed'));
                 } else {
                     // If the suspension is still active, log the user out
-                    $remainingDays = now()->diffInDays($user->suspension_until, false); // Negative if remaining days are in the past
+                    Carbon::now('Asia/Manila')->diffInDays($user->suspension_until, false); // Negative if remaining days are in the past
                     auth::logout();
-                    return redirect()->route('login')->with('error', "Your account is suspended. You can log in after {$remainingDays} day(s).");
+                    return redirect()->route('login')->with('error', "Your account is suspended.");
                 }
             }
         }

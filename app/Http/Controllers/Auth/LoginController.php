@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -67,27 +68,33 @@ class LoginController extends Controller
 
         // Attempt to log the user in
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-            // Check if the user is banned or suspended
+            // Get the authenticated user
             $user = Auth::user();
+
+            // Check if the user is banned
             if ($user->status === 'banned') {
                 Auth::logout();
                 return redirect()->route('login')->with('error', 'Your account is banned. Contact support for assistance.');
             }
 
+            // Check if the user is suspended
             if ($user->status === 'suspended') {
-                // Calculate the remaining suspension period
-                $remainingDays = now()->diffInDays($user->suspension_until);
-                $suspensionEnd = \Carbon\Carbon::parse($user->suspension_until)->format('F j, Y, g:i a'); // Format date and time
-
-                if ($remainingDays < 1) {
-                    $remainingDays = 1;
+                // Check if the suspension period has ended
+                if ($user->suspension_until && Carbon::now('Asia/Manila')->greaterThanOrEqualTo($user->suspension_until)) {
+                    // Update the user's status to active
+                    $user->update([
+                        'status' => 'active',
+                        'suspension_until' => null,
+                    ]);
+                } else {
+                    // Calculate the remaining suspension period
+                    $suspensionEnd = Carbon::parse($user->suspension_until)->format('F j, Y, g:i a'); // Format date and time
+                    Auth::logout();
+                    return redirect()->route('login')->with(
+                        'error',
+                        "Your account is suspended. You can log in on {$suspensionEnd}."
+                    );
                 }
-
-                Auth::logout();
-                return redirect()->route('login')->with(
-                    'error',
-                    "Your account is suspended. You can log in after {$remainingDays} day(s), on {$suspensionEnd}."
-                );
             }
 
             // If account is active, proceed to the intended page
@@ -97,4 +104,5 @@ class LoginController extends Controller
         // If credentials are invalid, redirect back with an error
         return redirect()->route('login')->with('error', 'Invalid credentials.');
     }
+
 }
