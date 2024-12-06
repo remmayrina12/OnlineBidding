@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
+
     use HasFactory, Notifiable;
 
     /**
@@ -82,6 +83,11 @@ class User extends Authenticatable
     public function getAverageRatingAttribute()
     {
         return $this->ratingsReceived()->avg('stars');
+    }
+
+    public function routeNotificationForSms()
+    {
+        return $this->info->phone_number ?? null; // Ensure `phone_number` exists in `user_infos` table
     }
 
 }

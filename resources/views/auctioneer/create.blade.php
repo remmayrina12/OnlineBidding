@@ -121,7 +121,7 @@
 
                 <!-- Quantity -->
                 <div class="form-group">
-                    <label for="quantity">{{ __('Quantity') }}</label>
+                    <label for="quantity">{{ __('Quantity (Per kg)') }}</label>
                     <input type="number" name="quantity" id="quantity" required>
                 </div>
 
@@ -139,7 +139,7 @@
 
                 <!-- Starting Price -->
                 <div class="form-group">
-                    <label for="starting_price">{{ __('Starting Price') }}</label>
+                    <label for="starting_price">{{ __('Starting Price (PHP)') }}</label>
                     <input type="number" step="0.01" name="starting_price" id="starting_price" required>
                 </div>
 

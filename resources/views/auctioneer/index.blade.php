@@ -92,7 +92,9 @@
                                 <td>{{ $product->starting_price }}</td>
                                 <td id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}" data-auction-status="{{ $product->auction_status }}"></td>
                                 @if (!empty($highestBids[$product->id]))
-                                    <td>Name: {{$highestBids[$product->id]->bidder->name}} <br>
+                                    <td>Name: <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->email) }}">
+                                                {{ $highestBids[$product->id]->bidder->name }}
+                                            </a> <br>
                                     Highest Bid: {{$highestBids[$product->id]->amount}}</td>
                                 @else
                                     <td>No Bidder</td>
@@ -109,13 +111,14 @@
                                             End Countdown
                                         </button>
                                     @else
-                                        <a id="end-button-{{ $product->id }}"
-                                            href="{{ route('auctioneer.end', $product->id) }}"
-                                            class="btn btn-warning btn-outline-light end-countdown-button"
-                                            data-product-id="{{ $product->id }}"
-                                            onclick="return confirm('Are you sure you want to end this product?')">
-                                            End Countdown
-                                        </a>
+                                        <form action="{{ route('auctioneer.end', $product->id) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="btn btn-warning btn-outline-light end-countdown-button"
+                                                    onclick="return confirm('Are you sure you want to end this product?')">
+                                                End Countdown
+                                            </button>
+                                        </form>
                                     @endif
                                 </td>
                             </tr>
@@ -160,7 +163,9 @@
                             <p><strong>Description:</strong> {{ $product->description }}</p>
                             <p><strong>Starting Price:</strong> {{ $product->starting_price }}</p>
                             @if (!empty($highestBids[$product->id]))
-                                <p><strong>Bidder:</strong> {{$highestBids[$product->id]->bidder->name}}</p>
+                                <p><strong>Bidder:</strong> <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->email) }}">
+                                                                {{ $highestBids[$product->id]->bidder->name }}
+                                                            </a></p>
                                 <p><strong>Highest Bid:</strong> {{$highestBids[$product->id]->amount}}</p>
                             @else
                                 <td>No Bidder</td>

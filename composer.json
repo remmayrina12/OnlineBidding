@@ -6,11 +6,14 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "guzzlehttp/guzzle": "^7.9",
         "laravel/framework": "^11.9",
         "laravel/reverb": "^1.0",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.5",
-        "pusher/pusher-php-server": "^7.2"
+        "laravel/vonage-notification-channel": "^3.3",
+        "pusher/pusher-php-server": "^7.2",
+        "vonage/client": "^4.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

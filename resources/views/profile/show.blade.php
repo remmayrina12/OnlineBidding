@@ -103,7 +103,7 @@
             <p class="card-text"><strong>Contact Number:</strong> {{ $user->info->contact_number ?? 'No contact number provided.' }}</p>
             @if(Auth::check() && Auth::id() !== $user->id)
                 <div class="d-flex justify-content-end">
-                    <a href="{{ route('chat.index') }}" class="btn btn-primary">Message</a>
+                    <a href="{{ route('chat.index', $user->id) }}" class="btn btn-primary">Message</a>
                 </div>
             @endif
         </div>

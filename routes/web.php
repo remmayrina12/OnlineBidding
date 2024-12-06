@@ -14,7 +14,7 @@ use App\Http\Controllers\Auctioneer\ProductController;
 use App\Http\Controllers\Admin\ManageProductController;
 
 Route::get('/', function () {
-    return view('auth.login');
+    return view('LandingPage');
 });
 
 Route::post('home', [LoginController::class, 'store']);
@@ -83,9 +83,7 @@ Route::middleware(['auth', 'checkStatus'])->group(function () {
 
     });
 
-    // Route::get('/chat/{userId}', function ($userId) {
-    //     return view('profile.chat', ['userId' => $userId]);
-    // })->middleware('auth');
+
 
     //Profile Routes
     Route::middleware('auth')->group(function () {
@@ -93,14 +91,12 @@ Route::middleware(['auth', 'checkStatus'])->group(function () {
         Route::put('/profile/update/{userId}', [ProfileController::class, 'update'])->name('profile.update');
         Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
         Route::get('/profile/show/{email}', [ProfileController::class, 'show'])->name('profile.show');
-        // Route::get('/profile/messages/{user}', [MessageController::class, 'index'])->name('profile.messages.index');
-        // Route::post('/profile/messages', [MessageController::class, 'store'])->name('profile.messages.store');
     });
 
     Route::middleware(['auth'])->group(function () {
-        Route::get('/chat', [MessageController::class, 'index'])->name('chat.index');
+        Route::get('/chat/index/{receiverId}', [MessageController::class, 'index'])->name('chat.index');
         Route::post('/chat/send', [MessageController::class, 'send'])->name('chat.send');
-        Route::get('/chat/messages/{receiverId}', [MessageController::class, 'fetchMessages'])->name('chat.messages');
+        Route::get('/chat/messages/fetchMessages/{receiverId}', [MessageController::class, 'fetchMessages'])->name('chat.messages.fetchMessages');
     });
 
     //Rating Routes

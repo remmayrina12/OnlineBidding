@@ -58,27 +58,6 @@ function sendAuctionEndedNotification(productId) {
         console.error('Error sending notification:', error);
     });
 }
-
-
-// function triggerButton(productId) {
-//     const button = document.querySelector(`a.end-countdown-button[data-product-id="${productId}"]`);
-//     if (button) {
-//         // Append a query parameter to indicate a programmatic request
-//         const originalHref = button.href;
-//         const programmaticHref = `${originalHref}?trigger=programmatic`;
-
-//         // Temporarily set the programmatic URL
-//         button.href = programmaticHref;
-
-//         button.onclick = null;
-
-//         button.click(); // Trigger the click event
-
-//         // Restore the original URL
-//         button.href = originalHref;
-//     }
-// }
-
 // Initialize countdowns for all timers on the page and modals
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.auction-timer').forEach(function (timerElement) {

@@ -106,28 +106,16 @@
                     <!-- Divider -->
                     <hr class="sidebar-divider my-0">
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('profile.show', Auth::user()->email) }}">
-                            <i class="fas fa-fw fa-tachometer-alt"></i>
-                            <span>View Profile</span></a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('notifications.index') }}">
-                            <i class="fas fa-fw fa-tachometer-alt"></i>
-                            <span>Your Notifications</span></a>
-                    </li>
-
                     <!-- Auctioneer -->
                     @if (Auth::check() && Auth::user()->role == 'auctioneer')
 
+                        <!-- Divider -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('auctioneer') }}">
+                            <a class="nav-link" href="{{ route('profile.show', Auth::user()->email) }}">
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
-                                <span>Dashboard</span></a>
+                                <span>View Profile</span></a>
                         </li>
 
-                        <!-- Divider -->
                         <hr class="sidebar-divider">
 
                         <li class="nav-item">
@@ -168,13 +156,13 @@
                     <!-- Bidder -->
                     @if (Auth::check() && Auth::user()->role == 'bidder')
 
+                        <!-- Divider -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('bidder') }}">
+                            <a class="nav-link" href="{{ route('profile.show', Auth::user()->email) }}">
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
-                                <span>Dashboard</span></a>
+                                <span>View Profile</span></a>
                         </li>
 
-                        <!-- Divider -->
                         <hr class="sidebar-divider">
 
                         <li class="nav-item">
@@ -241,6 +229,12 @@
                                 <span>Reports</span></a>
                         </li>
                     @endif
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('notifications.index') }}">
+                            <i class="fas fa-fw fa-tachometer-alt"></i>
+                            <span>Your Notifications</span></a>
+                    </li>
 
                     <!-- Divider -->
                     <hr class="sidebar-divider d-none d-md-block">

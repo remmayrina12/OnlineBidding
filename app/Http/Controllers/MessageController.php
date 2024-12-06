@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Message;
-use App\Events\MessageSent;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class MessageController extends Controller
 {
-    // In MessageController.php
-    public function index()
+    public function index($receiverId)
     {
-        $users = User::where('id', '!=', Auth::id())->get();
+        $users = User::where('name', '!=', Auth::user()->name)
+                        ->where('id', '=', $receiverId)
+                        ->get();
+
+        $receiverId = User::findOrFail($receiverId);
+
         return view('chat.index', compact('users'));
     }
 
@@ -26,31 +29,26 @@ class MessageController extends Controller
             $query->where('sender_id', $receiverId)
                   ->where('receiver_id', Auth::id());
         })
-        ->with('sender', 'receiver')
-        ->orderBy('created_at', 'asc')->get();
+        ->with('sender:id,name', 'receiver:id,name')
+        ->orderBy('created_at', 'asc')
+        ->get();
 
         return response()->json($messages);
     }
 
     public function send(Request $request)
     {
-        // Validate input
         $request->validate([
             'receiver_id' => 'required|exists:users,id',
             'message' => 'required|string|max:1000',
         ]);
 
-        // Create and store the message
         $message = new Message();
         $message->sender_id = Auth::id();
         $message->receiver_id = $request->receiver_id;
         $message->message = $request->message;
         $message->save();
 
-
-        // Broadcast the message to others
-        broadcast(new MessageSent($message))->toOthers();
-
-        return response()->json($message);
+        return response()->json(['success' => true, 'message' => 'Message sent successfully.']);
     }
 }

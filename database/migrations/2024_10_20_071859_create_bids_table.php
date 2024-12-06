@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bids', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('product_id')->constrained()->onDelete('cascade'); // Bids are related to products
+            $table->foreignId('product_id')->constrained('products')->onDelete('cascade'); // Bids are related to products
             $table->foreignId('bidder_id')->constrained('users')->onDelete('cascade'); // Bids are placed by users (bidders)
             $table->decimal('amount', 15, 2); // The bid amount
             $table->decimal('highest_bid', 10, 2)->nullable();

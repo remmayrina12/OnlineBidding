@@ -99,28 +99,34 @@ class ProfileController extends Controller
     }
 
     public function show($email, Request $request)
-{
-    $query = $request->input('query');
+    {
+        $query = $request->input('query');
 
-    // If there is a search query, search for users
-    if ($query) {
-        $user = User::where('name', 'LIKE', "%{$query}%")
-                    ->orWhere('email', 'LIKE', "%{$query}%")
-                    ->where('email', $email)  // Ensure we're searching for the user with the provided email
-                    ->firstOrFail();
+        // If there is a search query, search for users but exclude admins
+        if ($query) {
+            $user = User::where(function ($q) use ($query) {
+                            $q->where('name', 'LIKE', "%{$query}%")
+                            ->orWhere('email', 'LIKE', "%{$query}%");
+                        })
+                        ->where('role', '!=', 'admin') // Exclude admins
+                        ->first();
+
+            if (!$user) {
+                abort(404, 'User not found or not allowed to access.');
+            }
+
+            return view('profile.show', compact('user', 'query'));
+        }
+
+        // If no query is provided, fetch the user by email
+        if (Auth::user()->email == $email) {
+            $user = Auth::user();
+        } else {
+            $user = User::where('email', $email)
+                        ->where('role', '!=', 'admin') // Exclude admins
+                        ->firstOrFail();
+        }
 
         return view('profile.show', compact('user', 'query'));
     }
-
-    // If no query is provided, return the authenticated user's profile
-    if (Auth::user()->email == $email) {
-        $user = Auth::user();
-    } else {
-        // If the email does not match the logged-in user, fetch the user with the given email
-        $user = User::where('email', $email)->firstOrFail();
-    }
-
-    return view('profile.show', compact('user', 'query'));
-}
-
 }
