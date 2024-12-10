@@ -102,17 +102,32 @@
 
                         <div class="mb-3">
                             <label for="current_password" class="form-label">Current Password</label>
-                            <input type="password" name="current_password" id="current_password" class="form-control" required>
+                            <div class="input-group">
+                                <input type="password" name="current_password" id="current_password" class="form-control" required>
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('current_password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="password" class="form-label">New Password</label>
-                            <input type="password" name="password" id="password" class="form-control" required>
+                            <div class="input-group">
+                                <input type="password" name="password" id="password" class="form-control" required>
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label for="password_confirmation" class="form-label">Confirm Password</label>
-                            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
+                            <div class="input-group">
+                                <input type="password" name="password_confirmation" id="password_confirmation" class="form-control" required>
+                                <button type="button" class="btn btn-outline-secondary" onclick="togglePassword('password_confirmation')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-warning" onclick="return confirm('Are you sure you want to change your password?')">Change Password</button>
@@ -143,3 +158,19 @@
 </div>
 
 @endsection
+
+<script>
+    function togglePassword(fieldId) {
+        const passwordField = document.getElementById(fieldId);
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+
+        // Toggle the icon (requires Font Awesome or similar library)
+        const icon = event.target.querySelector('i');
+        if (icon) {
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        }
+    }
+</script>
+

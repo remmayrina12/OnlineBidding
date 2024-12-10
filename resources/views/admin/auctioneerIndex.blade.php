@@ -58,7 +58,11 @@
                                 <td>{{ $user->email }}</td>
                                 <td>{{ $user->info->contact_number ?? 'N/A' }}</td>
                                 <td>{{ $user->info->address ?? 'N/A' }}</td>
-                                <td>{{ $user->info->valid_id ?? 'N/A' }}</td>
+                                <td>@if($user->info && $user->info->valid_id)
+                                    <a href="{{ asset('storage/' . $user->info->valid_id) }}" target="_blank">{{ 'View current ID' ?? 'N/A' }}</a>
+                                @endif
+                                </td>
+
                                 <td>
                                     <!-- Suspend User -->
                                     <form action="{{ route('users.suspend', $user->id) }}" method="POST" style="display: inline;">

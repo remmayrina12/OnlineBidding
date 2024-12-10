@@ -8,47 +8,111 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            color: #333;
             font-family: Arial, sans-serif;
         }
+
         .hero-section {
-            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://via.placeholder.com/1920x800');
-            background-size: cover;
-            background-position: center;
-            color: white;
+            background: url('assets/panibagong logo eyyy.png') no-repeat center center/cover;
+            height: 53vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            padding: 150px 20px;
+            color: black;
+            position: relative;
         }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+        }
+
+        .hero-section .container {
+            position: relative;
+            z-index: 2;
+        }
+
         .hero-section h1 {
             font-size: 3rem;
-            font-weight: bold;
+            margin-bottom: 1rem;
+            color: white;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
         }
+
         .hero-section p {
             font-size: 1.2rem;
-            margin: 20px 0;
-        }
-        .features-section .feature-card {
-            text-align: center;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
-        .features-section .feature-card:hover {
-            transform: translateY(-10px);
-        }
-        .testimonials-section {
-            background-color: #f9f9f9;
-            padding: 60px 20px;
-        }
-        .testimonials-section .testimonial {
-            margin: 20px 0;
-            font-style: italic;
-        }
-        .cta-section {
-            background-color: #007bff;
+            margin-bottom: 1.5rem;
             color: white;
+            text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.7);
+        }
+
+        .hero-section .btn {
+            padding: 10px 25px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+        }
+
+        .cta-section {
             text-align: center;
             padding: 50px 20px;
+            background-image: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-section .btn {
+            padding: 10px 25px;
+            font-size: 1.2rem;
+            border-radius: 25px;
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-section h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-section p {
+                font-size: 1.2rem;
+            }
+
+            .cta-section h2 {
+                font-size: 2rem;
+            }
+
+            .cta-section p {
+                font-size: 1rem;
+            }
         }
     </style>
 </head>
@@ -59,54 +123,7 @@
             <h1>Welcome to Our Online Bidding Platform</h1>
             <p>Discover, bid, and win your favorite items in real-time auctions!</p>
             <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Join Now</a>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features-section py-5">
-        <div class="container text-center">
-            <h2>What Makes Us Special?</h2>
-            <div class="row mt-4">
-                <div class="col-md-4">
-                    <div class="feature-card bg-light">
-                        <h5>Real-Time Auctions</h5>
-                        <p>Participate in live auctions and experience the thrill of bidding.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card bg-light">
-                        <h5>Verified Sellers</h5>
-                        <p>Buy with confidence from trusted and verified sellers.</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="feature-card bg-light">
-                        <h5>Secure Payments</h5>
-                        <p>Your transactions are safe and protected by the latest technology.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials-section">
-        <div class="container text-center">
-            <h2>What Our Users Say</h2>
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <div class="testimonial">
-                        <p>"This platform is amazing! I found unique products at great prices."</p>
-                        <strong>- Sarah M.</strong>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="testimonial">
-                        <p>"The bidding process was seamless and exciting. Highly recommend!"</p>
-                        <strong>- James K.</strong>
-                    </div>
-                </div>
-            </div>
+            <a href="{{ route('register') }}" class="btn btn-light btn-lg">Sign Up Now</a>
         </div>
     </section>
 
@@ -115,7 +132,7 @@
         <div class="container">
             <h2>Ready to Start Bidding?</h2>
             <p>Create your account today and join thousands of satisfied users.</p>
-            <a href="{{ route('register') }}" class="btn btn-light btn-lg">Sign Up Now</a>
+            <a href="{{ route('register') }}" class="btn btn-light">Get Started</a>
         </div>
     </section>
 

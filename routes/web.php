@@ -17,8 +17,6 @@ Route::get('/', function () {
     return view('LandingPage');
 });
 
-Route::post('home', [LoginController::class, 'store']);
-
 Route::middleware(['auth', 'checkStatus'])->group(function () {
 
     Route::get('/bidder/dashboard', function () {
