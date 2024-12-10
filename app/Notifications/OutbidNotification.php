@@ -30,7 +30,7 @@ class OutbidNotification extends Notification
         return [
             'product_id' => $this->product->id,
             'product_name' => $this->product->name,
-            'message' => 'Your bid for ' . $this->product->name . ' has been outbid by ' . $this->newBidAmount . '.',
+            'message' => 'Your bid for ' . $this->product->product_name . ' has been outbid by ' . $this->newBidAmount . '.',
         ];
     }
 }
