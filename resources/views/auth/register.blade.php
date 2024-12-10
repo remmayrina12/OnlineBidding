@@ -18,7 +18,7 @@
         background: url('assets/panibagong logo eyyy.png')no-repeat center;
         flex: 1;
         justify-content: center;
-        height: 60vh;
+        height: 70vh;
         background: cover;
         position: relative;
         overflow: hidden;
@@ -29,14 +29,6 @@
     .card:hover {
         transform: scale(1.02);
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-    }
-    .card-heder {
-        background: #abebc6;
-        color: black;
-        text-align: center;
-        font-size: 1.5rem;
-        padding: 15px;
-        font-weight: bold;
     }
     .card-body {
         background: filter: blur(5px);
