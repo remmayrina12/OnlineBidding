@@ -246,10 +246,10 @@
                         <strong>Category:</strong> {{ $bid->product->category }}<br />
                         <strong>Quantity:</strong> {{ $bid->product->quantity }}<br />
                         <strong>Description:</strong> {{ $bid->product->description }}<br />
-                        <strong>Starting Price:</strong> {{ number_format($bid->product->starting_price, 2) }}<br />
+                        <strong>Starting Price:</strong> PHP {{ number_format($bid->product->starting_price, 2) }}<br />
 
                         @if (!empty($highestBids[$bid->product->id]))
-                            <strong>Highest Bid:</strong> {{ $highestBids[$bid->product->id]->amount }}<br />
+                            <strong>Highest Bid:</strong> PHP {{ number_format($highestBids[$bid->product->id]->amount, 2) }}<br />
 
                             @if(Auth::id() == $bid->product->auctioneer_id)
                                 <p><strong>Bidder:</strong> {{ $highestBids[$bid->product->id]->bidder->name }}</p>
@@ -294,15 +294,15 @@
                                     <p><strong>Category:</strong> {{ $bid->product->category }}</p>
                                     <p><strong>Quantity:</strong> {{ $bid->product->quantity }}</p>
                                     <p><strong>Description:</strong> {{ $bid->product->description }}</p>
-                                    <p><strong>Starting Price:</strong> {{ $bid->product->starting_price }}</p>
+                                    <p><strong>Starting Price:</strong> PHP {{ number_format($bid->product->starting_price, 2) }}</p>
 
                                     @if (!empty($highestBids[$bid->product->id]))
-                                        <p><strong>Highest Bid:</strong> {{ $highestBids[$bid->product->id]->amount }}</p>
+                                        <p><strong>Highest Bid:</strong> PHP {{ number_format($highestBids[$bid->product->id]->amount, 2) }}</p>
                                     @endif
 
                                     <p>
                                         <strong>Created by:</strong>
-                                            <a href="{{ route('profile.show', $bid->product->auctioneer->email ?? '') }}">
+                                            <a href="{{ route('profile.show', $bid->product->auctioneer->id ?? '') }}">
                                                 {{ $bid->product->auctioneer->name ?? 'Unknown' }}
                                             </a>
                                     </p>

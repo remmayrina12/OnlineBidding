@@ -2,10 +2,11 @@
 
 namespace App\Notifications;
 
-use Vonage\Client;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
+use Twilio\Rest\Client as TwilioClient;
 use Illuminate\Notifications\Notification;
-use Illuminate\Notifications\Messages\MailMessage;
 
 class ProductRequestNotification extends Notification
 {
@@ -20,7 +21,7 @@ class ProductRequestNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database']; // Use database notifications
+        return ['database'];  // Ensure 'sms' is in the via list
     }
 
     public function toDatabase($notifiable)
@@ -32,18 +33,4 @@ class ProductRequestNotification extends Notification
             'message' => $this->product->product_name . ' product has been submitted for approval.'
         ];
     }
-
-    // public function toSms($notifiable)
-    // {
-    //     $vonageClient = new Client(new Client\Credentials\Basic(
-    //         config('services.vonage.api_key'),
-    //         config('services.vonage.api_secret')
-    //     ));
-
-    //     $vonageClient->message()->send([
-    //         'to' => $notifiable->routeNotificationForSms(),
-    //         'from' => config('services.vonage.sms_from'),
-    //         'text' => $this->product->product_name . ' product has been submitted for approval.',
-    //     ]);
-    // }
 }

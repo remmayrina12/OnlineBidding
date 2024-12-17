@@ -38,6 +38,38 @@
         margin-top: 1.5rem;
     }
 
+    /* Table responsiveness */
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table img {
+        width: 100%;
+        max-width: 80px;
+        height: auto;
+    }
+
+    @media (max-width: 768px) {
+        .modal-content {
+            padding: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+        }
+
+        .modal-details {
+            font-size: 0.875rem;
+        }
+
+        .modal-image img {
+            max-height: 200px;
+        }
+
+        .table th, .table td {
+            font-size: 0.875rem;
+        }
+    }
 </style>
 
 <div class="py-12">
@@ -50,53 +82,55 @@
                 @if ($archivedProducts->isEmpty())
                     <p>{{ __("No archived products found.") }}</p>
                 @else
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Product Image</th>
-                            <th>Product Name</th>
-                            <th>Category</th>
-                            <th>Quantity</th>
-                            <th>Description</th>
-                            <th>Starting Price</th>
-                            <th>Auction Time</th>
-                            <th>Winner</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($archivedProducts as $product)
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
                             <tr>
-                                <td>
-                                    @if($product->product_image)
-                                        <img src="{{ asset('storage/' . $product->product_image) }}" alt="{{ $product->product_name }}" class="img-fluid rounded" style="width: 80px;">
-                                    @else
-                                        <span class="text-muted">No image</span>
-                                    @endif
-                                </td>
-                                <td>{{ $product->product_name }}</td>
-                                <td>{{ $product->category }}</td>
-                                <td>{{ $product->quantity }}</td>
-                                <td>{{ $product->description }}</td>
-                                <td>{{ $product->starting_price }}</td>
-                                <td id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}"></td>
-                                @if (!empty($highestBids[$product->id]))
-                                    <td>Name: {{$highestBids[$product->id]->bidder->name}} <br>
-                                    Highest Bid: {{$highestBids[$product->id]->amount}}</td>
-                                @else
-                                    <td>No Bidder</td>
-                                @endif
-                                <td>{{ $product->product_post_status }}</td>
-                                <td>
-                                    <button class="btn btn-outline-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#productModal-{{ $product->id }}" title="View product details to place a bid">
-                                        <i class="bi bi-eye-fill"></i> {{ __('View for Bidding') }}
-                                    </button>
-                                </td>
+                                <th>Product Image</th>
+                                <th>Product Name</th>
+                                <th>Category</th>
+                                <th>Quantity</th>
+                                <th>Description</th>
+                                <th>Starting Price</th>
+                                <th>Auction Time</th>
+                                <th>Winner</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach ($archivedProducts as $product)
+                                <tr>
+                                    <td>
+                                        @if($product->product_image)
+                                            <img src="{{ asset('storage/' . $product->product_image) }}" alt="{{ $product->product_name }}" class="img-fluid rounded">
+                                        @else
+                                            <span class="text-muted">No image</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $product->product_name }}</td>
+                                    <td>{{ $product->category }}</td>
+                                    <td>{{ $product->quantity }}</td>
+                                    <td>{{ $product->description }}</td>
+                                    <td>PHP {{ number_format($product->starting_price, 2) }}</td>
+                                    <td id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}"></td>
+                                    @if (!empty($highestBids[$product->id]))
+                                        <td>Name: {{$highestBids[$product->id]->bidder->name}} <br>
+                                        Highest Bid: {{$highestBids[$product->id]->amount}}</td>
+                                    @else
+                                        <td>No Bidder</td>
+                                    @endif
+                                    <td>{{ $product->product_post_status }}</td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#productModal-{{ $product->id }}" title="View product details">
+                                            <i class="bi bi-eye-fill"></i> {{ __('View Details') }}
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
                 @endif
             </div>
         </div>
@@ -137,13 +171,13 @@
                                 <p><strong>Bidder:</strong> {{$highestBids[$product->id]->bidder->name}}</p>
                                 <p><strong>Highest Bid:</strong> {{$highestBids[$product->id]->amount}}</p>
                             @else
-                                <td>No Bidder</td>
+                                <p>No Bidder</p>
                             @endif
                             <p><strong class="fas fa-user fa-sm fa-fw mr-2 text-black-400"></strong>{{ $bidCounts[$product->id] ?? 0 }}</p>
                         </div>
                     </div>
                 </div>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -153,4 +187,3 @@
 <script src="{{ asset('js/countdown.js') }}" defer></script>
 
 @endsection
-

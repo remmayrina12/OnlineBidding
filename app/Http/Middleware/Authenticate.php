@@ -11,7 +11,7 @@ class Authenticate
 {
     public function handle($request, Closure $next, ...$guards)
     {
-        abort(404);
+
         if (Auth::check()) {
             $user = Auth::user();
 

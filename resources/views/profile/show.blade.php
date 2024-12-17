@@ -63,7 +63,7 @@
 
 <div class="container">
 <!-- Search Form -->
-<form action="{{ route('profile.show', $user->email ?? Auth::user()->email) }}" method="GET" class="mb-4">
+<form action="{{ route('profile.show', $user->id ?? Auth::user()->id) }}" method="GET" class="mb-4">
     <div class="input-group">
         <input type="text" name="query" class="form-control" placeholder="Search for users..." value="{{ request('query') }}">
         <button class="btn btn-primary" type="submit">Search</button>
@@ -103,6 +103,9 @@
             <p class="card-text"><strong>Contact Number:</strong> {{ $user->info->contact_number ?? 'No contact number provided.' }}</p>
             @if(Auth::check() && Auth::id() !== $user->id)
                 <div class="d-flex justify-content-end">
+                    @if($user->role === 'auctioneer')
+                        <a href="{{ route('markLocation.index', $user->id) }}" class="btn btn-primary">Show Location</a>
+                    @endif
                     <a href="{{ route('chat.index', $user->id) }}" class="btn btn-primary">Message</a>
                 </div>
             @endif

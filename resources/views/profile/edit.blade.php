@@ -91,6 +91,9 @@
                             @endif
                             <input type="file" class="form-control" name="valid_id">
                         </div>
+                        @if(auth()->user() && auth()->user()->role === 'auctioneer')
+                            <a href="{{ route('markLocation.create', $user->id) }}" class="btn btn-primary">Create Location</a> <br>
+                        @endif
 
                         <button type="submit" class="btn btn-primary mt-3" onclick="return confirm('Are you sure you want to save it?')">Save Changes</button>
                     </form>

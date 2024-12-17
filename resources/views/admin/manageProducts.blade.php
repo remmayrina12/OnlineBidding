@@ -98,7 +98,7 @@
                                 <td>{{ $manage->category }}</td>
                                 <td>{{ $manage->quantity }}</td>
                                 <td>{{ $manage->description }}</td>
-                                <td>{{ $manage->starting_price }}</td>
+                                <td>PHP {{ number_format($manage->starting_price, 2) }}</td>
                                 <td>{{ $manage->product_post_status }}</td>
                                 <td>
                                     <a href="{{route('admin.acceptProduct', $manage->id)}}" class="btn btn-outline-secondary" onclick="return confirm('Are you sure you want to accept this product?')">Accept</a>

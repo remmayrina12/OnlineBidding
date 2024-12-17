@@ -87,7 +87,11 @@ class User extends Authenticatable
 
     public function routeNotificationForSms()
     {
-        return $this->info->phone_number ?? null; // Ensure `phone_number` exists in `user_infos` table
+        return $this->info->contact_number ?? null; // Ensure `phone_number` exists in `user_infos` table
+    }
+    public function markLocations()
+    {
+        return $this->hasMany(MarkLocation::class);
     }
 
 }

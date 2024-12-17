@@ -247,10 +247,10 @@
                             <strong>Category:</strong> {{ $product->category }}<br />
                             <strong>Quantity:</strong> {{ $product->quantity }}<br />
                             <strong>Description:</strong> {{ $product->description }}<br />
-                            <strong>Starting Price:</strong> {{ number_format($product->starting_price, 2) }}<br />
+                            <strong>Starting Price:</strong> PHP {{ number_format($product->starting_price, 2) }}<br />
 
                             @if (!empty($highestBids[$product->id]))
-                                <strong>Highest Bid:</strong> {{ $highestBids[$product->id]->amount }}<br />
+                                <strong>Highest Bid:</strong> PHP {{ number_format($highestBids[$product->id]->amount, 2) }}<br />
                                 @if(Auth::id() == $product->auctioneer_id)
                                     <strong>Bidder:</strong> {{ $highestBids[$product->id]->bidder->name }}<br />
                                 @endif
@@ -262,7 +262,7 @@
 
                         <!-- Modal Trigger for Bidder and Winner -->
                         @if($product->auction_status == 'open' && $product->auction_time > now())
-                            @if(Auth::user()->role === "auctioneer" || Auth::user()->role === "admin")
+                            @if(Auth::user()->role === "auctioneer" || Auth::user()->role === "admin" || Auth::user()->role === "admin2")
                                 <button type="button" class="btn btn-primary product-button" data-bs-toggle="modal" data-bs-target="#productModal{{ $product->id }}">
                                     View Product
                                 </button>
@@ -303,14 +303,14 @@
                                         <p><strong>Category:</strong> {{ $product->category }}</p>
                                         <p><strong>Quantity:</strong> {{ $product->quantity }}</p>
                                         <p><strong>Description:</strong> {{ $product->description }}</p>
-                                        <p><strong>Starting Price:</strong> {{ number_format($product->starting_price, 2) }}</p>
+                                        <p><strong>Starting Price:</strong> PHP {{ number_format($product->starting_price, 2) }}</p>
 
                                         @if (!empty($highestBids[$product->id]))
-                                            <p><strong>Highest Bid:</strong> {{ number_format($highestBids[$product->id]->amount, 2) }}</p>
+                                            <p><strong>Highest Bid:</strong> PHP {{ number_format($highestBids[$product->id]->amount, 2) }}</p>
                                             @if(Auth::id() == $product->auctioneer_id)
                                                 <p>
                                                     <strong>Bidder:</strong>
-                                                    <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->email) }}">
+                                                    <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->id) }}">
                                                         {{ $highestBids[$product->id]->bidder->name }}
                                                     </a>
                                                 </p>
@@ -321,7 +321,7 @@
 
                                         <p>
                                             <strong>Created by:</strong>
-                                                <a href="{{ route('profile.show', $product->auctioneer->email) }}">
+                                                <a href="{{ route('profile.show', $product->auctioneer->id) }}">
                                                     {{ $product->auctioneer->name}}
                                                 </a>
                                         </p>
@@ -351,11 +351,11 @@
                                         @if (!empty($highestBids[$product->id]))
                                             <p>
                                                 <strong>Name:</strong>
-                                                <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->email) }}">
+                                                <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->id) }}">
                                                     {{ $highestBids[$product->id]->bidder->name }}
                                                 </a>
                                             </p>
-                                            <p><strong>Winning Bid:</strong> {{ number_format($highestBids[$product->id]->amount, 2) }}</p>
+                                            <p><strong>Winning Bid:</strong> PHP {{ number_format($highestBids[$product->id]->amount, 2) }}</p>
                                         @else
                                             <p>No winner for this product.</p>
                                         @endif
@@ -377,11 +377,11 @@
                                                     @foreach ($allBids[$product->id] as $bid)
                                                         <tr>
                                                             <td>
-                                                                <a href="{{ route('profile.show', $bid->bidder->email) }}">
+                                                                <a href="{{ route('profile.show', $bid->bidder->id) }}">
                                                                     {{ $bid->bidder->name }}
                                                                 </a>
                                                             </td>
-                                                            <td>{{ $bid->amount }}</td>
+                                                            <td>PHP {{ number_format($bid->amount, 2) }}</td>
                                                             <td>{{ $bid->created_at->format('d-m-Y H:i:s') }}</td>
                                                         </tr>
                                                     @endforeach
@@ -396,7 +396,7 @@
                                         @if(Auth::user()->role == 'bidder' && isset($highestBids[$product->id]) && $highestBids[$product->id]->bidder_id == Auth::id())
                                             <div class="text-center">
                                                 <button type="submit" class="submit-button mt-3 w-50">
-                                                    <a href="{{ route('profile.show', $product->auctioneer->email) }}">
+                                                    <a href="{{ route('profile.show', $product->auctioneer->id) }}">
                                                         {{ 'View ' . $product->auctioneer->name . ' Profile' }}
                                                     </a>
                                                 </button>

@@ -205,10 +205,10 @@
                                 <strong>Category:</strong> {{ $bid->product->category }}<br />
                                 <strong>Quantity:</strong> {{ $bid->product->quantity }}<br />
                                 <strong>Description:</strong> {{ $bid->product->description }}<br />
-                                <strong>Starting Price:</strong> {{ number_format($bid->product->starting_price, 2) }}<br />
+                                <strong>Starting Price:</strong> PHP {{ number_format($bid->product->starting_price, 2) }}<br />
 
                                 @if (!empty($highestBids[$bid->product->id]))
-                                    <strong>Highest Bid:</strong> {{ $highestBids[$bid->product->id]->amount }}<br />
+                                    <strong>Highest Bid:</strong> PHP {{ number_format($highestBids[$bid->product->id]->amount, 2) }}<br />
 
                                     <!-- Display only if authenticated user is the auctioneer -->
                                     @if(Auth::id() == $bid->product->auctioneer_id)
@@ -245,11 +245,11 @@
                                             @if (!empty($highestBids[$bid->product->id]))
                                                 <p>
                                                     <strong>Name:</strong>
-                                                    <a href="{{ route('profile.show', $highestBids[$bid->product->id]->bidder->email) }}">
+                                                    <a href="{{ route('profile.show', $highestBids[$bid->product->id]->bidder->id) }}">
                                                         {{ $highestBids[$bid->product->id]->bidder->name }}
                                                     </a>
                                                 </p>
-                                                <p><strong>Winning Bid:</strong> {{ number_format($highestBids[$bid->product->id]->amount, 2) }}</p>
+                                                <p><strong>Winning Bid:</strong> PHP {{ number_format($highestBids[$bid->product->id]->amount, 2) }}</p>
                                             @else
                                                 <p>No winner for this product.</p>
                                             @endif
@@ -275,7 +275,7 @@
                                                                         {{ $bid->bidder->name }}
                                                                     </a>
                                                                 </td>
-                                                                <td>{{ $bid->amount }}</td>
+                                                                <td>PHP {{ number_format($bid->amount, 2) }}</td>
                                                                 <td>{{ $bid->created_at->format('d-m-Y H:i:s') }}</td>
                                                             </tr>
                                                         @endforeach
@@ -290,7 +290,7 @@
                                             @if(Auth::user()->role == 'bidder' && $highestBids[$bid->product->id]->bidder_id == Auth::id())
                                             <div class="text-center">
                                                 <button type="submit" class="submit-button mt-3 w-50">
-                                                    <a href="{{ route('profile.show', $bid->product->auctioneer->email) }}">
+                                                    <a href="{{ route('profile.show', $bid->product->auctioneer->id) }}">
                                                         {{ 'View ' . $bid->product->auctioneer->name . ' profile' }}
                                                     </a>
                                                 </button>

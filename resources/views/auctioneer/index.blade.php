@@ -3,7 +3,6 @@
 @section('content')
 
 <style>
-    /* Modal background overlay */
     .modal-content {
         background-color: white;
         border-radius: 0.5rem;
@@ -37,8 +36,8 @@
         justify-content: space-around;
         margin-top: 1.5rem;
     }
-
 </style>
+
 @if(session('success'))
 <script>
     Swal.fire({
@@ -60,71 +59,73 @@
                 @if ($products->isEmpty())
                     <p>{{ __("You haven't created any products yet.") }}</p>
                 @else
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Product Image</th>
-                            <th>Product Name</th>
-                            <th>Category</th>
-                            <th>Quantity</th>
-                            <th>Description</th>
-                            <th>Starting Price</th>
-                            <th>Auction Time</th>
-                            <th>Winner</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($products as $product)
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
                             <tr>
-                                <td>
-                                    @if($product->product_image)
-                                        <img src="{{ asset('storage/' . $product->product_image) }}" alt="{{ $product->product_name }}" class="img-fluid rounded" style="width: 80px;">
+                                <th>Product Image</th>
+                                <th>Product Name</th>
+                                <th>Category</th>
+                                <th>Quantity</th>
+                                <th>Description</th>
+                                <th>Starting Price</th>
+                                <th>Auction Time</th>
+                                <th>Winner</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($products as $product)
+                                <tr>
+                                    <td>
+                                        @if($product->product_image)
+                                            <img src="{{ asset('storage/' . $product->product_image) }}" alt="{{ $product->product_name }}" class="img-fluid rounded" style="width: 80px;">
+                                        @else
+                                            <span class="text-muted">No image</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $product->product_name }}</td>
+                                    <td>{{ $product->category }}</td>
+                                    <td>{{ $product->quantity }}</td>
+                                    <td>{{ $product->description }}</td>
+                                    <td>PHP {{ number_format($product->starting_price, 2) }}</td>
+                                    <td id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}" data-auction-status="{{ $product->auction_status }}"></td>
+                                    @if (!empty($highestBids[$product->id]))
+                                        <td>Name: <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->id) }}">
+                                                    {{ $highestBids[$product->id]->bidder->name }}
+                                                </a> <br>
+                                        Highest Bid: PHP {{ number_format($highestBids[$product->id]->amount, 2)}}</td>
                                     @else
-                                        <span class="text-muted">No image</span>
+                                        <td>No Bidder</td>
                                     @endif
-                                </td>
-                                <td>{{ $product->product_name }}</td>
-                                <td>{{ $product->category }}</td>
-                                <td>{{ $product->quantity }}</td>
-                                <td>{{ $product->description }}</td>
-                                <td>{{ $product->starting_price }}</td>
-                                <td id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}" data-auction-status="{{ $product->auction_status }}"></td>
-                                @if (!empty($highestBids[$product->id]))
-                                    <td>Name: <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->email) }}">
-                                                {{ $highestBids[$product->id]->bidder->name }}
-                                            </a> <br>
-                                    Highest Bid: {{$highestBids[$product->id]->amount}}</td>
-                                @else
-                                    <td>No Bidder</td>
-                                @endif
-                                <td>{{ $product->product_post_status }}</td>
-                                <td>
-                                    <button class="btn btn-outline-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#productModal-{{ $product->id }}" title="View product details to place a bid">
-                                        <i class="bi bi-eye-fill"></i> {{ __('View for Bidding') }}
-                                    </button>
-                                </td>
-                                <td>
-                                    @if ($product->auction_status == 'closed')
-                                        <button class="btn btn-warning end-countdown-button" disabled>
-                                            End Countdown
+                                    <td>{{ $product->product_post_status }}</td>
+                                    <td>
+                                        <button class="btn btn-outline-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#productModal-{{ $product->id }}" title="View product details to place a bid">
+                                            <i class="bi bi-eye-fill"></i> {{ __('View for Bidding') }}
                                         </button>
-                                    @else
-                                        <form action="{{ route('auctioneer.end', $product->id) }}" method="POST" style="display: inline;">
-                                            @csrf
-                                            <button type="submit"
-                                                    class="btn btn-warning btn-outline-light end-countdown-button"
-                                                    onclick="return confirm('Are you sure you want to end this product?')">
+                                    </td>
+                                    <td>
+                                        @if ($product->auction_status == 'closed')
+                                            <button class="btn btn-warning end-countdown-button" disabled>
                                                 End Countdown
                                             </button>
-                                        </form>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                                        @else
+                                            <form action="{{ route('auctioneer.end', $product->id) }}" method="POST" style="display: inline;">
+                                                @csrf
+                                                <button type="submit"
+                                                        class="btn btn-warning btn-outline-light end-countdown-button"
+                                                        onclick="return confirm('Are you sure you want to end this product?')">
+                                                    End Countdown
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
                 @endif
             </div>
         </div>
@@ -140,33 +141,27 @@
                     <h3 class="modal-title" id="modalTitle">{{ $product->product_name }}</h3>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div id="countdownTimer{{ $product->id }}"
-                    class="auction-timer"
-                    data-end-time="{{ strtotime($product->auction_time) }}"
-                    data-auction-status="{{ $product->auction_status }}"
-                    style="font-size: 2rem; font-weight: bold; text-align: center; color: #ff4500; display: flex; justify-content: center;">
-                    Loading...
-                </div>
+
                 <!-- Modal Body -->
                 <div class="modal-body">
                     <div class="row">
                         <!-- Product Image -->
-                        <div class="col-md-6 text-center modal-image">
+                        <div class="col-md-6 col-12 text-center modal-image">
                             <img src="{{ asset('storage/' . $product->product_image) }}" alt="{{ $product->product_name }}" class="img-fluid rounded">
                         </div>
 
                         <!-- Product Details -->
-                        <div class="col-md-6">
+                        <div class="col-md-6 col-12">
                             <p><strong>Product Name:</strong> {{ $product->product_name }}</p>
                             <p><strong>Category:</strong> {{ $product->category }}</p>
                             <p><strong>Quantity:</strong> {{ $product->quantity }}</p>
                             <p><strong>Description:</strong> {{ $product->description }}</p>
-                            <p><strong>Starting Price:</strong> {{ $product->starting_price }}</p>
+                            <p><strong>Starting Price:</strong> PHP {{ number_format($product->starting_price, 2) }}</p>
                             @if (!empty($highestBids[$product->id]))
-                                <p><strong>Bidder:</strong> <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->email) }}">
+                                <p><strong>Bidder:</strong> <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->id) }}">
                                                                 {{ $highestBids[$product->id]->bidder->name }}
                                                             </a></p>
-                                <p><strong>Highest Bid:</strong> {{$highestBids[$product->id]->amount}}</p>
+                                <p><strong>Highest Bid:</strong> PHP {{number_format($highestBids[$product->id]->amount, 2)}}</p>
                             @else
                                 <td>No Bidder</td>
                             @endif
@@ -175,11 +170,11 @@
                     </div>
                 </div>
                 <!-- Modal Footer -->
-                <div class="modal-footer justify-content-between">
+                <div class="modal-footer flex-column flex-sm-row justify-content-between">
                     <!-- Edit Form -->
                     <form action="{{ route('auctioneer.edit', $product->id) }}" method="GET" class="d-inline">
                         @csrf
-                        <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to edit this product?')"">Edit</button>
+                        <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to edit this product?')">Edit</button>
                     </form>
                     <!-- Delete Form -->
                     <form action="{{ route('auctioneer.destroy', $product->id) }}" method="POST" class="d-inline">

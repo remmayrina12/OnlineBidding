@@ -35,10 +35,16 @@ return [
         ],
     ],
 
-        'vonage' => [
-            'api_key' => env('VONAGE_API_KEY'),
-            'api_secret' => env('VONAGE_API_SECRET'),
-            'sms_from' => env('VONAGE_SMS_FROM'),
-        ],
+    'vonage' => [
+        'api_key' => env('VONAGE_API_KEY'),
+        'api_secret' => env('VONAGE_API_SECRET'),
+        'sms_from' => env('VONAGE_SMS_FROM'),
+    ],
+
+    'twilio' => [
+        'sid' => env('TWILIO_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'from' => env('TWILIO_PHONE_NUMBER'),
+    ],
 
 ];

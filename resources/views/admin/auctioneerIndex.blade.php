@@ -65,24 +65,29 @@
 
                                 <td>
                                     <!-- Suspend User -->
-                                    <form action="{{ route('users.suspend', $user->id) }}" method="POST" style="display: inline;">
-                                        @csrf
-                                        <label for="suspension_days">Suspend for:</label>
-                                        <input type="number" name="days" id="suspension_days" placeholder="Days" required>
-                                        <button type="submit" class="btn btn-warning"
-                                            onclick="return confirm('Are you sure you want to suspend this user?')">
-                                            Suspend
-                                        </button>
-                                    </form>
-
-                                    <form action="{{ route('users.unsuspend', $user->id) }}" method="POST" style="display: inline;">
-                                        @csrf
-                                        <button type="submit" class="btn btn-success"
-                                            onclick="return confirm('Are you sure you want to ban this user?')">
-                                            Unsuspend
-                                        </button>
-                                    </form>
-
+                                    @if ($user->status == 'suspended')
+                                        <!-- Unsuspend Form -->
+                                        <form action="{{ route('users.unsuspend', $user->id) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success"
+                                                onclick="return confirm('Are you sure you want to unsuspend this user?')">
+                                                Unsuspend
+                                            </button>
+                                        </form>
+                                    @else
+                                        <!-- Suspend Form -->
+                                        <form action="{{ route('users.suspend', $user->id) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            <label for="suspension_days">Suspend for:</label>
+                                            <input type="number" name="days" id="suspension_days" placeholder="Days" required>
+                                            <button type="submit" class="btn btn-warning"
+                                                onclick="return confirm('Are you sure you want to suspend this user?')">
+                                                Suspend
+                                            </button>
+                                        </form>
+                                    @endif
+                                    <!-- Ban User -->
+                                    @if ($user->status == 'active')
                                     <!-- Ban User -->
                                     <form action="{{ route('users.ban', $user->id) }}" method="POST" style="display: inline;">
                                         @csrf
@@ -91,7 +96,7 @@
                                             Ban
                                         </button>
                                     </form>
-
+                                    @else
                                     <form action="{{ route('users.unban', $user->id) }}" method="POST" style="display: inline;">
                                         @csrf
                                         <button type="submit" class="btn btn-success"
@@ -99,6 +104,7 @@
                                             Unban
                                         </button>
                                     </form>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

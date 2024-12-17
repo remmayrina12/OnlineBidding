@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -22,9 +22,13 @@
     <!-- Custom styles for this template-->
     <link href="{{ url('assets/css/sb-admin-2.min.css') }}" rel="stylesheet">
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <link rel="icon" href="/path-to-your-favicon/favicon.ico">
+
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.css" rel="stylesheet" />
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.1/mapbox-gl.js"></script>
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
@@ -42,6 +46,11 @@
         width: 350px; /* Adjust the width to fit the message */
     }
 
+    /* Optionally, adjust the arrow or positioning */
+    .dropdown-menu-end {
+        left: auto !important;
+
+    }
     /* Notification Icon Circle */
     .icon-circle {
         width: 40px;
@@ -55,7 +64,7 @@
     /* Badge for unread notifications */
     .badge {
         position: absolute;
-        top: -5px;
+        top: 0px;
         right: -5px;
         font-size: 0.75rem;
     }
@@ -96,6 +105,8 @@
                         </div>
                         @if (Auth::check() && Auth::user()->role == 'admin')
                             <div class="sidebar-brand-text mx-3">Admin</div>
+                        @elseif (Auth::check() && Auth::user()->role == 'admin2')
+                            <div class="sidebar-brand-text mx-3">Admin2</div>
                         @elseif (Auth::check() && Auth::user()->role == 'auctioneer')
                             <div class="sidebar-brand-text mx-3">Auctioneer</div>
                         @else
@@ -111,7 +122,7 @@
 
                         <!-- Divider -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('profile.show', Auth::user()->email) }}">
+                            <a class="nav-link" href="{{ route('profile.show', Auth::user()->id) }}">
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
                                 <span>View Profile</span></a>
                         </li>
@@ -150,7 +161,11 @@
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
                                 <span>Archived</span></a>
                         </li>
-
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('notifications.index') }}">
+                                <i class="fas fa-fw fa-tachometer-alt"></i>
+                                <span>Your Notifications</span></a>
+                        </li>
                     @endif
 
                     <!-- Bidder -->
@@ -158,7 +173,7 @@
 
                         <!-- Divider -->
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('profile.show', Auth::user()->email) }}">
+                            <a class="nav-link" href="{{ route('profile.show', Auth::user()->id) }}">
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
                                 <span>View Profile</span></a>
                         </li>
@@ -188,7 +203,11 @@
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
                                 <span>Auction Win</span></a>
                         </li>
-
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('notifications.index') }}">
+                                <i class="fas fa-fw fa-tachometer-alt"></i>
+                                <span>Your Notifications</span></a>
+                        </li>
                     @endif
 
                     <!-- Admin -->
@@ -209,12 +228,12 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                                aria-expanded="true" aria-controls="collapseTwo">
+                            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseManageUsers"
+                                aria-expanded="true" aria-controls="collapseManageUsers">
                                 <i class="fas fa-fw fa-cog"></i>
                                 <span>Manage Users</span>
                             </a>
-                            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+                            <div id="collapseManageUsers" class="collapse" aria-labelledby="headingManageUsers" data-parent="#accordionSidebar">
                                 <div class="bg-white py-2 collapse-inner rounded">
                                     <h6 class="collapse-header">User:</h6>
                                     <a class="collapse-item" href="{{ route('admin.auctioneerIndex') }}">Auctioneer</a>
@@ -224,17 +243,37 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ route('reportIndex.index') }}">
+                            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReports"
+                                aria-expanded="true" aria-controls="collapseReports">
+                                <i class="fas fa-fw fa-cog"></i>
+                                <span>Reports</span>
+                            </a>
+                            <div id="collapseReports" class="collapse" aria-labelledby="headingReports" data-parent="#accordionSidebar">
+                                <div class="bg-white py-2 collapse-inner rounded">
+                                    <h6 class="collapse-header">Reports:</h6>
+                                    <a class="collapse-item" href="{{ route('reportIndex.index') }}">Manage Reports</a>
+                                    <a class="collapse-item" href="{{ route('reportForListOfWinningBid.getTopRanks') }}">List Of Winning Bid</a>
+                                    <a class="collapse-item" href="{{ route('reportForTopBidder.getTopBidders') }}">Top Bidder</a>
+                                    <a class="collapse-item" href="{{ route('reportForTopSeller.getTopSellers') }}">Top Seller</a>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('notifications.index') }}">
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
-                                <span>Reports</span></a>
+                                <span>Your Notifications</span></a>
                         </li>
                     @endif
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('notifications.index') }}">
-                            <i class="fas fa-fw fa-tachometer-alt"></i>
-                            <span>Your Notifications</span></a>
-                    </li>
+                    {{-- Admin2 --}}
+                    @if (Auth::check() && Auth::user()->role == 'admin2')
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('home.show') }}">
+                                <i class="fas fa-fw fa-tachometer-alt"></i>
+                                <span>Home</span></a>
+                        </li>
+                    @endif
 
                     <!-- Divider -->
                     <hr class="sidebar-divider d-none d-md-block">
@@ -264,30 +303,6 @@
                             <!-- Topbar Navbar -->
                             <ul class="navbar-nav ml-auto">
 
-                                <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-                                <li class="nav-item dropdown no-arrow d-sm-none">
-                                    <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <i class="fas fa-search fa-fw"></i>
-                                    </a>
-                                    <!-- Dropdown - Messages -->
-                                    <div class="dropdown-menu    dropdown-menu-right p-3 shadow animated--grow-in"
-                                        aria-labelledby="searchDropdown">
-                                        <form class="form-inline mr-auto w-100 navbar-search">
-                                            <div class="input-group">
-                                                <input type="text" class="form-control bg-light border-0 small"
-                                                    placeholder="Search for..." aria-label="Search"
-                                                    aria-describedby="basic-addon2">
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-primary" type="button">
-                                                        <i class="fas fa-search fa-sm"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </li>
-
                                 <!-- Nav Item - Notification alerts -->
                                 <li class="nav-item dropdown no-arrow mx-1">
                                     <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
@@ -297,10 +312,8 @@
                                         <span class="badge bg-danger">{{ Auth::user()->unreadNotifications->count() }}</span>
                                     </a>
 
-                                    <!-- Dropdown - Alerts -->
                                     <ul class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
                                         aria-labelledby="alertsDropdown">
-
                                         @if(Auth::user()->unreadNotifications->isEmpty())
                                             <li class="text-center p-2">
                                                 <span class="text-muted">No new notifications</span>
@@ -309,7 +322,7 @@
                                             @foreach(Auth::user()->unreadNotifications as $notification)
                                                 <li>
                                                     <a class="dropdown-item d-flex align-items-center"
-                                                        href="{{ route('notifications.markAsRead', $notification->id) }}">
+                                                    href="{{ route('notifications.markAsRead', $notification->id) }}">
                                                         <div class="me-3">
                                                             <div class="icon-circle bg-primary">
                                                                 <i class="fas fa-info text-white"></i>
@@ -327,7 +340,6 @@
                                     </ul>
                                 </li>
 
-
                                 <div class="topbar-divider d-none d-sm-block"></div>
 
                                 <!-- Nav Item - User Information -->
@@ -342,23 +354,23 @@
                                                     <img src="{{ asset('assets/—Pngtree—vector add user icon_4101348.png') }}" class="img-profile rounded-circle" alt="Default Picture">
                                                 @endif
 
-                                        <!-- Dropdown - User Information -->
-                                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                            aria-labelledby="userDropdown">
-                                            <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                                                <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                                Profile
-                                            </a>
-                                            <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                                Logout
-                                            </a>
-                                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                                @csrf
-                                            </form>
-                                        </div>
-                                    </li>
+                                    <!-- Dropdown - User Information -->
+                                    <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                        aria-labelledby="userDropdown">
+                                        <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                                            <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
+                                            Profile
+                                        </a>
+                                        <div class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                            <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                            Logout
+                                        </a>
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                            @csrf
+                                        </form>
+                                    </div>
+                                </li>
                             </ul>
 
                         </nav>
@@ -423,5 +435,30 @@
 
     {{-- countdown script --}}
     <script src="{{ asset('js/countdown.js') }}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Make sure you include jQuery and Bootstrap's JavaScript (for Bootstrap 4/5) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Add this script for dropdown toggle on mobile -->
+    <script>
+            $(document).ready(function() {
+        // Toggle dropdown visibility when clicked
+        $('#alertsDropdown').on('click', function(e) {
+            e.stopPropagation();  // Prevents event from propagating to other elements
+            $(this).next('.dropdown-menu').toggleClass('show'); // Toggle visibility
+        });
+
+        // Close the dropdown if the user clicks outside of it
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('#alertsDropdown').length) {
+                $('#alertsDropdown').next('.dropdown-menu').removeClass('show'); // Close dropdown
+            }
+        });
+    });
+    </script>
+
 </body>
 </html>

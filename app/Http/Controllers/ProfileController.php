@@ -98,35 +98,41 @@ class ProfileController extends Controller
         return redirect()->route('profile.edit')->with('success', 'Password updated successfully.');
     }
 
-    public function show($email, Request $request)
+    public function show($id, Request $request)
     {
         $query = $request->input('query');
 
-        // If there is a search query, search for users but exclude admins
+        // If a search query is provided
         if ($query) {
             $user = User::where(function ($q) use ($query) {
-                            $q->where('name', 'LIKE', "%{$query}%")
-                            ->orWhere('email', 'LIKE', "%{$query}%");
-                        })
-                        ->where('role', '!=', 'admin') // Exclude admins
-                        ->first();
+                    $q->where('name', 'LIKE', "%{$query}%")
+                    ->orWhere('email', 'LIKE', "%{$query}%");
+                })
+                ->where('role', '!=', 'admin') // Exclude admin users
+                ->first();
 
             if (!$user) {
-                abort(404, 'User not found or not allowed to access.');
+                return redirect()->back()->withErrors(['error' => 'User not found or not accessible.']);
             }
 
             return view('profile.show', compact('user', 'query'));
         }
 
-        // If no query is provided, fetch the user by email
-        if (Auth::user()->email == $email) {
+        // If no query is provided, check access for the requested user ID
+        if (Auth::check() && Auth::user()->id == $id) {
+            // Show the logged-in user's profile
             $user = Auth::user();
         } else {
-            $user = User::where('email', $email)
-                        ->where('role', '!=', 'admin') // Exclude admins
-                        ->firstOrFail();
+            // Fetch the requested user's profile by ID, excluding admins
+            $user = User::where('id', $id)
+                        ->where('role', '!=', 'admin')
+                        ->first();
+
+            if (!$user) {
+                abort(404, 'User not found or not accessible.');
+            }
         }
 
-        return view('profile.show', compact('user', 'query'));
+        return view('profile.show', compact('user'));
     }
 }

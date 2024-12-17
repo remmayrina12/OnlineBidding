@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Message;
 use App\Models\User;
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\MessageNotification;
+use Illuminate\Support\Facades\Notification;
 
 class MessageController extends Controller
 {
@@ -48,6 +50,10 @@ class MessageController extends Controller
         $message->receiver_id = $request->receiver_id;
         $message->message = $request->message;
         $message->save();
+
+         // Send notification
+        $receiver = User::findOrFail($request->receiver_id);
+        Notification::send($receiver, new MessageNotification($message));
 
         return response()->json(['success' => true, 'message' => 'Message sent successfully.']);
     }
