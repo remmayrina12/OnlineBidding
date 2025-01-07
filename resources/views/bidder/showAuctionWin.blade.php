@@ -203,12 +203,12 @@
                             <div class="product-title">{{ $bid->product->product_name }}</div>
                             <div class="product-details">
                                 <strong>Category:</strong> {{ $bid->product->category }}<br />
-                                <strong>Quantity:</strong> {{ $bid->product->quantity }}<br />
+                                <strong>Quantity:</strong> {{ number_format($bid->product->quantity) }} kg<br />
                                 <strong>Description:</strong> {{ $bid->product->description }}<br />
-                                <strong>Starting Price:</strong> PHP {{ number_format($bid->product->starting_price, 2) }}<br />
+                                <strong>Starting Price:</strong> ₱{{ number_format($bid->product->starting_price, 2) }}<br />
 
                                 @if (!empty($highestBids[$bid->product->id]))
-                                    <strong>Highest Bid:</strong> PHP {{ number_format($highestBids[$bid->product->id]->amount, 2) }}<br />
+                                    <strong>Highest Bid:</strong> ₱{{ number_format($highestBids[$bid->product->id]->amount, 2) }}<br />
 
                                     <!-- Display only if authenticated user is the auctioneer -->
                                     @if(Auth::id() == $bid->product->auctioneer_id)
@@ -249,7 +249,7 @@
                                                         {{ $highestBids[$bid->product->id]->bidder->name }}
                                                     </a>
                                                 </p>
-                                                <p><strong>Winning Bid:</strong> PHP {{ number_format($highestBids[$bid->product->id]->amount, 2) }}</p>
+                                                <p><strong>Winning Bid:</strong> ₱{{ number_format($highestBids[$bid->product->id]->amount, 2) }}</p>
                                             @else
                                                 <p>No winner for this product.</p>
                                             @endif
@@ -275,7 +275,7 @@
                                                                         {{ $bid->bidder->name }}
                                                                     </a>
                                                                 </td>
-                                                                <td>PHP {{ number_format($bid->amount, 2) }}</td>
+                                                                <td>₱{{ number_format($bid->amount, 2) }}</td>
                                                                 <td>{{ $bid->created_at->format('d-m-Y H:i:s') }}</td>
                                                             </tr>
                                                         @endforeach

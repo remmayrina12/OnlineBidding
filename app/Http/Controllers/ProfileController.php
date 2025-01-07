@@ -78,9 +78,15 @@ class ProfileController extends Controller
 
         // Save user and user info
         if ($user->save() && $userinfo->save()) {
-            return redirect()->back()->with('success', 'Profile updated successfully.');
+            return redirect()->back()->with('alert', [
+                                                'type' => 'success',
+                                                'message' => 'Profile updated successfully.',
+                                            ]);
         } else {
-            return redirect()->back()->with('error', 'Failed to update profile.');
+            return redirect()->back()->with('alert', [
+                                                'type' => 'error',
+                                                'message' =>'Failed to update profile.',
+                                            ]);
         }
     }
 
@@ -95,7 +101,10 @@ class ProfileController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('profile.edit')->with('success', 'Password updated successfully.');
+        return redirect()->route('profile.edit')->with('alert', [
+                                                                    'type' => 'success',
+                                                                    'message' => 'Password updated successfully.',
+                                                                ]);
     }
 
     public function show($id, Request $request)
@@ -108,7 +117,8 @@ class ProfileController extends Controller
                     $q->where('name', 'LIKE', "%{$query}%")
                     ->orWhere('email', 'LIKE', "%{$query}%");
                 })
-                ->where('role', '!=', 'admin') // Exclude admin users
+                ->where('role', '!=', 'admin' ) // Exclude admin users
+                ->where('role', '!=', 'admin2' )
                 ->first();
 
             if (!$user) {

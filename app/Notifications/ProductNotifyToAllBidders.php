@@ -19,7 +19,7 @@ class ProductNotifyToAllBidders extends Notification
     }
     public function via(object $notifiable)
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     public function toDatabase(object $notifiable)
@@ -29,5 +29,14 @@ class ProductNotifyToAllBidders extends Notification
             'product_name' => $this->product->product_name,
             'message' => 'Someone opened an auction go and check it out!'
         ];
+    }
+
+    public function toMail($notifiable)
+    {
+        return (new MailMessage)
+            ->subject('Product Notification')
+            ->line('Someone opened an auction go and check it out!')
+            ->action('View Details', url('/home'))
+            ->line('Thank you for using our application!');
     }
 }

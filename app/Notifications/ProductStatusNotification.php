@@ -21,7 +21,7 @@ class ProductStatusNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database']; // Storing in the database
+        return ['database', 'mail']; // Storing in the database
     }
 
     public function toDatabase($notifiable)
@@ -34,5 +34,16 @@ class ProductStatusNotification extends Notification
                 ? 'Your product ' . $this->product->product_name . ' has been approved and is now active.'
                 : 'Your product ' . $this->product->product_name . ' has been rejected.',
         ];
+    }
+
+    public function toMail($notifiable)
+    {
+        return (new MailMessage)
+            ->subject('Product Status')
+            ->line($this->product_post_status === 'active'
+            ? 'Your product ' . $this->product->product_name . ' has been approved and is now active.'
+            : 'Your product ' . $this->product->product_name . ' has been rejected.')
+            ->action('View Details', url('/home'))
+            ->line('Thank you for using our application!');
     }
 }

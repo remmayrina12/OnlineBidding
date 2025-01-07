@@ -1,27 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-@if(session('success'))
-<script>
-    Swal.fire({
-        title: 'Success!',
-        text: "{{ session('success') }}",
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-@if(session('error'))
-<script>
-    Swal.fire({
-        title: 'Error!',
-        text: "{{ session('error') }}",
-        icon: 'error',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-
 <!-- Search Form -->
 <form action="{{ route('admin.auctioneerIndex') }}" method="GET" class="mb-4">
     <div class="input-group">

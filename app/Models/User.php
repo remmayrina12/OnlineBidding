@@ -84,10 +84,9 @@ class User extends Authenticatable
     {
         return $this->ratingsReceived()->avg('stars');
     }
-
-    public function routeNotificationForSms()
+        public function routeNotificationForTwilio()
     {
-        return $this->info->contact_number ?? null; // Ensure `phone_number` exists in `user_infos` table
+        return $this->info->contact_number ?? null;
     }
     public function markLocations()
     {

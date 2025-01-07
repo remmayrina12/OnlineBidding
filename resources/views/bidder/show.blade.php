@@ -180,27 +180,6 @@
         outline-offset: 2px;
     }
 </style>
-@if(session('success'))
-<script>
-    Swal.fire({
-        title: 'Success!',
-        text: "{{ session('success') }}",
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-@if(session('failed'))
-<script>
-    Swal.fire({
-        title: 'Failed!',
-        text: "{{ session('failed') }}",
-        icon: 'error',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-
 <!-- Search Form -->
 <form action="{{ route('bidder.show') }}" method="GET" class="mb-4">
     <div class="input-group">
@@ -244,12 +223,12 @@
 
                     <div class="product-details">
                         <strong>Category:</strong> {{ $bid->product->category }}<br />
-                        <strong>Quantity:</strong> {{ $bid->product->quantity }}<br />
+                        <strong>Quantity:</strong> {{ number_format($bid->product->quantity) }} kg<br />
                         <strong>Description:</strong> {{ $bid->product->description }}<br />
-                        <strong>Starting Price:</strong> PHP {{ number_format($bid->product->starting_price, 2) }}<br />
+                        <strong>Starting Price:</strong> ₱{{ number_format($bid->product->starting_price, 2) }}<br />
 
                         @if (!empty($highestBids[$bid->product->id]))
-                            <strong>Highest Bid:</strong> PHP {{ number_format($highestBids[$bid->product->id]->amount, 2) }}<br />
+                            <strong>Highest Bid:</strong> ₱{{ number_format($highestBids[$bid->product->id]->amount, 2) }}<br />
 
                             @if(Auth::id() == $bid->product->auctioneer_id)
                                 <p><strong>Bidder:</strong> {{ $highestBids[$bid->product->id]->bidder->name }}</p>
@@ -292,12 +271,12 @@
                                     <!-- Product Details -->
                                     <p><strong class="fas fa-user fa-sm fa-fw mr-2 text-black-400"></strong>{{ $bidCounts[$bid->product->id] ?? 0 }}</p>
                                     <p><strong>Category:</strong> {{ $bid->product->category }}</p>
-                                    <p><strong>Quantity:</strong> {{ $bid->product->quantity }}</p>
+                                    <p><strong>Quantity:</strong> {{ number_format($bid->product->quantity) }} kg</p>
                                     <p><strong>Description:</strong> {{ $bid->product->description }}</p>
-                                    <p><strong>Starting Price:</strong> PHP {{ number_format($bid->product->starting_price, 2) }}</p>
+                                    <p><strong>Starting Price:</strong> ₱{{ number_format($bid->product->starting_price, 2) }}</p>
 
                                     @if (!empty($highestBids[$bid->product->id]))
-                                        <p><strong>Highest Bid:</strong> PHP {{ number_format($highestBids[$bid->product->id]->amount, 2) }}</p>
+                                        <p><strong>Highest Bid:</strong> ₱{{ number_format($highestBids[$bid->product->id]->amount, 2) }}</p>
                                     @endif
 
                                     <p>

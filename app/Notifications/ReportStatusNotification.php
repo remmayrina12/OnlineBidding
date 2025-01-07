@@ -22,7 +22,7 @@ class ReportStatusNotification extends Notification
 
     public function via(object $notifiable)
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     public function toDatabase(object $notifiable)
@@ -36,5 +36,16 @@ class ReportStatusNotification extends Notification
                                 ? 'Your report has been reviewed by admin.'
                                 : 'Your report is pending',
         ];
+    }
+
+    public function toMail($notifiable)
+    {
+        return (new MailMessage)
+            ->subject('Report Status')
+            ->line($this->status === 'reviewed'
+                        ? 'Your report has been reviewed by admin.'
+                        : 'Your report is pending')
+            ->action('View Details', url('/home'))
+            ->line('Thank you for using our application!');
     }
 }

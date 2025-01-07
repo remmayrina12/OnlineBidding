@@ -19,7 +19,7 @@ class ReportReviewNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     public function toDatabase($notifiable)
@@ -32,5 +32,14 @@ class ReportReviewNotification extends Notification
             'status' => $this->report->status,
             'message' => 'Someone has been reported, check the reports.'
         ];
+    }
+
+    public function toMail($notifiable)
+    {
+        return (new MailMessage)
+            ->subject('Report Review')
+            ->line('Someone has been reported, check the reports.')
+            ->action('View Details', url('/admin/reportIndex'))
+            ->line('Thank you for using our application!');
     }
 }

@@ -84,17 +84,19 @@ Route::middleware(['auth', 'checkStatus'])->group(function () {
         Route::get('/admin/reportIndex', [ReportController::class, 'index'])->name('reportIndex.index');
         Route::get('/admin/reportIndex/status/{id}', [ReportController::class, 'updateStatus'])->name('reports.updateStatus');
 
-        Route::get('/admin/reportForListOfWinningBid', [ReportsForListOfWinningBidController::class, 'getTopRanks'])->name('reportForListOfWinningBid.getTopRanks');
-        Route::get('/admin/reportForTopBidder', [ReportsForTopBidderController::class, 'getTopBidders'])->name('reportForTopBidder.getTopBidders');
-        Route::get('/admin/reportForTopSeller', [ReportsForTopSellerController::class, 'getTopSellers'])->name('reportForTopSeller.getTopSellers');
-
+        // Route::get('/admin/reportForListOfWinningBid', [ReportsForListOfWinningBidController::class, 'getTopRanks'])->name('reportForListOfWinningBid.getTopRanks');
+        // Route::get('/admin/reportForTopBidder', [ReportsForTopBidderController::class, 'getTopBidders'])->name('reportForTopBidder.getTopBidders');
+        // Route::get('/admin/reportForTopSeller', [ReportsForTopSellerController::class, 'getTopSellers'])->name('reportForTopSeller.getTopSellers');
 
         Route::post('/admin/users/{id}/suspend', [ManageUserController::class, 'suspendUser'])->name('users.suspend');
         Route::post('/admin/users/{id}/ban', [ManageUserController::class, 'banUser'])->name('users.ban');
         Route::post('/admin/users/{id}/unsuspend', [ManageUserController::class, 'unsuspendUser'])->name('users.unsuspend');
         Route::post('/admin/users/{id}/unban', [ManageUserController::class, 'unbanUser'])->name('users.unban');
-
     });
+
+        Route::get('reportForListOfWinningBid', [ReportsForListOfWinningBidController::class, 'getTopRanks'])->name('reportForListOfWinningBid.getTopRanks');
+        Route::get('reportForTopBidder', [ReportsForTopBidderController::class, 'getTopBidders'])->name('reportForTopBidder.getTopBidders');
+        Route::get('reportForTopSeller', [ReportsForTopSellerController::class, 'getTopSellers'])->name('reportForTopSeller.getTopSellers');
 
     //Profile Routes
     Route::middleware('auth')->group(function () {

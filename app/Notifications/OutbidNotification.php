@@ -22,7 +22,7 @@ class OutbidNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database']; // Save to database for later retrieval
+        return ['database', 'mail']; // Save to database for later retrieval
     }
 
     public function toDatabase($notifiable)
@@ -32,5 +32,14 @@ class OutbidNotification extends Notification
             'product_name' => $this->product->name,
             'message' => 'Your bid for ' . $this->product->product_name . ' has been outbid by ' . $this->newBidAmount . '.',
         ];
+    }
+
+    public function toMail($notifiable)
+    {
+        return (new MailMessage)
+            ->subject('Outbid Notification')
+            ->line('Your bid for ' . $this->product->product_name . ' has been outbid by ' . $this->newBidAmount . '.',)
+            ->action('View Details', url('/bidder/show'))
+            ->line('Thank you for using our application!');
     }
 }

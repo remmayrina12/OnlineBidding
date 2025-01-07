@@ -6,6 +6,8 @@
     <title>Online Bidding Platform</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include Bootstrap CSS and JS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -121,8 +123,8 @@
     <section class="hero-section">
         <div class="container">
             <h1>Welcome to Our Online Bidding Platform</h1>
-            <p>Discover, bid, and win your favorite items in real-time auctions!</p>
-            <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Join Now</a>
+            <p>Discover, bid, and win your favorite items in auctions!</p>
+            <a href="#" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#authModal">Join Now</a>
             <a href="{{ route('register') }}" class="btn btn-light btn-lg">Sign Up Now</a>
         </div>
     </section>
@@ -140,6 +142,23 @@
     <footer class="py-3 bg-dark text-white text-center">
         <p>&copy; {{ date('Y') }} Online Bidding Platform. All rights reserved.</p>
     </footer>
+
+    <!-- Modal Structure -->
+    <div class="modal fade" id="authModal" tabindex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="authModalLabel">Choose an Option</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+            <p>Welcome! Please choose an option to continue:</p>
+            <a href="{{ route('login') }}" class="btn btn-outline-primary btn-lg">Login</a>
+            <a href="{{ route('register') }}" class="btn btn-outline-success btn-lg">Register</a>
+            </div>
+        </div>
+        </div>
+    </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -20,7 +20,7 @@ class AuctionEndedNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database']; // Use database notifications
+        return ['database', 'mail']; // Use database notifications
     }
 
     public function toDatabase($notifiable)
@@ -44,5 +44,28 @@ class AuctionEndedNotification extends Notification
             'product_name' => $this->product->product_name,
             'message' => $message,
         ];
+    }
+
+    public function toMail($notifiable)
+    {
+        $message = '';
+
+        switch ($this->type) {
+            case 'winner':
+                $message = 'Congratulations! You won the auction for ' . $this->product->product_name . '.';
+                break;
+            case 'ended':
+                $message = 'The auction for ' . $this->product->product_name . ' has ended.';
+                break;
+            case 'auctioneer':
+                $message = 'The auction for your product ' . $this->product->product_name . ' has ended.';
+                break;
+        }
+
+        return (new MailMessage)
+            ->subject('Auction Ended Notification')
+            ->line($message)
+            ->action('View Details', url('/chat/index/{receiverId}'))
+            ->line('Thank you for using our application!');
     }
 }

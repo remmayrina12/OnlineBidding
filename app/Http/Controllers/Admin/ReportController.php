@@ -31,7 +31,10 @@ class ReportController extends Controller
             $report->notify(new ReportReviewNotification($report));
         }
 
-        return redirect()->back()->with('success', 'Report submitted successfully.');
+        return redirect()->back()->with('alert', [
+                                            'type' => 'success',
+                                            'message' => 'Report submitted successfully.',
+                                        ]);
     }
 
     public function index()
@@ -51,6 +54,9 @@ class ReportController extends Controller
             $report->notify(new ReportStatusNotification($report, 'reviewed'));
         }
 
-        return redirect()->back()->with('success', 'Report status updated.');
+        return redirect()->back()->with('alert', [
+                                            'type' => 'success',
+                                            'message' => 'Report status updated.',
+                                        ]);
     }
 }

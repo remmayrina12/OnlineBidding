@@ -83,17 +83,6 @@
     }
 </style>
 
-@if(session('success'))
-<script>
-    Swal.fire({
-        title: 'Success!',
-        text: "{{ session('success') }}",
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-
 <div class="py-12">
     <div class="max-w-md mx-auto sm:px-6 lg:px-8">
         <div class="form-container">
@@ -121,7 +110,7 @@
 
                 <!-- Quantity -->
                 <div class="form-group">
-                    <label for="quantity">{{ __('Quantity (Per kg)') }}</label>
+                    <label for="quantity">{{ __('Quantity (kg)') }}</label>
                     <input type="number" name="quantity" id="quantity" required>
                 </div>
 
@@ -139,7 +128,7 @@
 
                 <!-- Starting Price -->
                 <div class="form-group">
-                    <label for="starting_price">{{ __('Starting Price (PHP)') }}</label>
+                    <label for="starting_price">{{ __('Starting Price (₱)') }}</label>
                     <input type="number" step="0.01" name="starting_price" id="starting_price" required>
                 </div>
 

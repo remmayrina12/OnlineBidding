@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 class UserNotificationController extends Controller
 {
     /**
-     * Display a list of notifications.
+     * Display a list of notifications.S
      */
     public function index()
     {

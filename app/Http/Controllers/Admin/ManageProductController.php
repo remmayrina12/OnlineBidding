@@ -92,7 +92,10 @@ class ManageProductController extends Controller
             $bidder->notify(new ProductNotifyToAllBidders($data));
         }
 
-        return redirect()->back()->with('success', 'The Product is activated.');
+        return redirect()->back()->with('alert', [
+                                            'type' => 'success',
+                                            'message' => 'The Product is activated.',
+                                        ]);
     }
 
     public function rejectProduct(string $id)
@@ -109,6 +112,9 @@ class ManageProductController extends Controller
         }
 
 
-        return redirect()->back()->with('failed', 'The Product is rejected.');
+        return redirect()->back()->with('alert', [
+                                            'type' => 'failed',
+                                            'message' => 'The Product is rejected.',
+                                            ]);
         }
 }

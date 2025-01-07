@@ -34,7 +34,7 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $seller->auctioneer_name }}</td>
-                    <td>PHP {{ number_format($seller->total_sales, 2) }}</td>
+                    <td>₱{{ number_format($seller->total_sales, 2) }}</td>
                     <td>{{ $seller->total_products }}</td>
                     <td>{{ \Carbon\Carbon::parse($seller->creation_month . '-01')->format('F Y') }}</td>
                 </tr>

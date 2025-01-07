@@ -40,27 +40,6 @@
         color: #ffcc00;
     }
 </style>
-@if(session('success'))
-<script>
-    Swal.fire({
-        title: 'Success!',
-        text: "{{ session('success') }}",
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-@if(session('error'))
-<script>
-    Swal.fire({
-        title: 'Error!',
-        text: "{{ session('error') }}",
-        icon: 'error',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-
 <div class="container">
 <!-- Search Form -->
 <form action="{{ route('profile.show', $user->id ?? Auth::user()->id) }}" method="GET" class="mb-4">
@@ -76,7 +55,7 @@
         <div class="card-body">
             <!-- Profile Picture -->
             <div class="mb-4 text-center">
-                @if(Auth::check() && Auth::id() !== $user->id) <!-- Check if the user is authenticated and not viewing their own profile -->
+                @if(Auth::check() && Auth::id() !== $user->id && !in_array(Auth::user()->role, ['admin', 'admin2'])) <!-- Check if the user is authenticated and not viewing their own profile -->
                     <div class="mb-4 text-right">
                         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportModal">
                             Report User
@@ -101,7 +80,7 @@
 
             <!-- Contact Number -->
             <p class="card-text"><strong>Contact Number:</strong> {{ $user->info->contact_number ?? 'No contact number provided.' }}</p>
-            @if(Auth::check() && Auth::id() !== $user->id)
+            @if(Auth::check() && Auth::id() !== $user->id && !in_array(Auth::user()->role, ['admin', 'admin2']))
                 <div class="d-flex justify-content-end">
                     @if($user->role === 'auctioneer')
                         <a href="{{ route('markLocation.index', $user->id) }}" class="btn btn-primary">Show Location</a>
@@ -129,7 +108,7 @@
             <h3>Average Rating: No ratings yet</h3>
         @endif
 
-        @if (Auth::check() && Auth::id() !== $user->id)
+        @if (Auth::check() && Auth::id() !== $user->id && !in_array(Auth::user()->role, ['admin', 'admin2']))
             <form action="{{ route('ratings.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="user_id" value="{{ $user->id }}"> <!-- The user being rated -->

@@ -38,7 +38,7 @@
                     <td>{{ $product->product_name }}</td>
                     <td>{{ $product->bidder_name }}</td>
                     <td>{{ $product->auctioneer_name }}</td>
-                    <td>PHP {{ number_format($product->highest_bid, 2) }}</td>
+                    <td>₱{{ number_format($product->highest_bid, 2) }}</td>
                     <td>{{ \Carbon\Carbon::parse($product->created_at)->format('M d, Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($product->auction_time)->format('M d, Y') }}</td>
                 </tr>

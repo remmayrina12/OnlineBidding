@@ -42,7 +42,10 @@ class RatingController extends Controller
             'feedback' => $request->feedback,
         ]);
 
-        return redirect()->back()->with('success', 'Thank you for your feedback!');
+        return redirect()->back()->with('alert', [
+                                            'type' => 'success',
+                                            'message' => 'Thank you for your feedback!',
+                                        ]);
     }
 
     /**

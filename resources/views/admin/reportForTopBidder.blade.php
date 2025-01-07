@@ -34,7 +34,7 @@
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $bidder->bidder_name }}</td>
-                    <td>PHP {{ number_format($bidder->total_amount, 2) }}</td>
+                    <td>₱{{ number_format($bidder->total_amount, 2) }}</td>
                     <td>{{ $bidder->total_wins }}</td>
                     <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $bidder->month)->format('F Y') }}</td>
                 </tr>

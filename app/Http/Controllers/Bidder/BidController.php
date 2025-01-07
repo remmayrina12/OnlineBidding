@@ -54,12 +54,18 @@ class BidController extends Controller
         $product = Product::find($request->product_id);
         // Check if the auction time has passed
         if (Carbon::now() > $product->auction_time) {
-            return redirect()->back()->with('failed', 'Bidding has been closed for this product.');
+            return redirect()->back()->with('alert', [
+                                                'type' => 'failed',
+                                                'message' => 'Bidding has been closed for this product.',
+                                            ]);
         }
 
         // Check if the bid amount is lower than the auctioneer's starting price
         if ($request->amount < $product->starting_price) {
-            return redirect()->back()->with('failed', 'Your bid must be higher than the starting price of ' . number_format($product->starting_price, 2));
+            return redirect()->back()->with('alert', [
+                                                'type' => 'failed',
+                                                'message' => 'Your bid must be higher than the starting price of ₱' . number_format($product->starting_price, 2),
+                                            ]);
         }
 
         // Check if the new bid is higher than the current highest bid
@@ -76,11 +82,20 @@ class BidController extends Controller
         }
 
 
-            return redirect()->route('bidder.show')->with('success', 'Your bid was successfully placed!');
+            return redirect()->route('bidder.show')->with('alert', [
+                                                                        'type' => 'success',
+                                                                        'message' => 'Your bid was successfully placed!',
+                                                                    ]);
         } else {
             // If the new bid is lower or equal to the highest bid, return an error response
-            session()->flash('failed', 'Your bid must be higher than the current highest bid of ' . number_format($highestBid, 2));
-            return redirect()->back()->with('failed', 'Your bid must be higher than the current highest bid of ' . number_format($highestBid, 2));
+            session()->flash('alert', [
+                                'type' => 'failed',
+                                'message' => 'Your bid must be higher than the current highest bid of ₱' . number_format($highestBid, 2),
+                                ]);
+                return redirect()->back()->with('alert', [
+                                                    'type' => 'failed',
+                                                    'message' =>'Your bid must be higher than the current highest bid of ₱' . number_format($highestBid, 2),
+                                                    ]);
         }
     }
 
@@ -174,12 +189,18 @@ class BidController extends Controller
 
         // Check if the auction time has passed
         if (Carbon::now() > $product->auction_time) {
-            return redirect()->back()->with('failed', 'Bidding has been closed for this product.');
-        }
+            return redirect()->back()->with('alert', [
+                                                'type' => 'failed',
+                                                'message' => 'Bidding has been closed for this product.',
+                                                ]);
+    }
 
         // Check if the bid amount is lower than the auctioneer's starting price
         if ($request->amount < $product->starting_price) {
-            return redirect()->back()->with('failed', 'Your bid must be higher than the starting price of ' . number_format($product->starting_price, 2));
+            return redirect()->back()->with('alert', [
+                                                'type' => 'failed',
+                                                'message' => 'Your bid must be higher than the starting price of ₱' . number_format($product->starting_price, 2),
+                                            ]);
         }
 
         // Check if the new bid is higher than the current highest bid
@@ -193,10 +214,16 @@ class BidController extends Controller
             $previousHighestBid->bidder->notify(new OutbidNotification($product, $request->amount));
         }
 
-            return redirect()->back()->with('success', 'Your bid was successfully placed!');
+            return redirect()->back()->with('alert', [
+                                                'type' => 'success',
+                                                'message' =>'Your bid was successfully placed!',
+                                                ]);
         } else {
             // If the new bid is lower or equal to the highest bid, return an error response
-            return redirect()->back()->with('failed', 'Your bid must be higher than the current highest bid of ' . number_format($highestBid, 2));
+            return redirect()->back()->with('alert', [
+                                                'type' => 'failed',
+                                                'message' => 'Your bid must be higher than the current highest bid of ₱' . number_format($highestBid, 2),
+                                            ]);
         }
 
     }

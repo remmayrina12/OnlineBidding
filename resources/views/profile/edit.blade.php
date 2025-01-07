@@ -12,27 +12,6 @@
 }
 
 </style>
-@if(session('success'))
-<script>
-    Swal.fire({
-        title: 'Success!',
-        text: "{{ session('success') }}",
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-@if(session('error'))
-<script>
-    Swal.fire({
-        title: 'Error!',
-        text: "{{ session('error') }}",
-        icon: 'error',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">

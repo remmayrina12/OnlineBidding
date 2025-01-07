@@ -182,27 +182,6 @@
         outline-offset: 2px;
     }
 </style>
-@if(session('success'))
-<script>
-    Swal.fire({
-        title: 'Success!',
-        text: "{{ session('success') }}",
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-@if(session('failed'))
-<script>
-    Swal.fire({
-        title: 'Failed!',
-        text: "{{ session('failed') }}",
-        icon: 'error',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-
 <!-- Search Form -->
 <form action="{{ route('home.show') }}" method="GET" class="mb-4">
     <div class="input-group">
@@ -245,12 +224,12 @@
 
                         <div class="product-details">
                             <strong>Category:</strong> {{ $product->category }}<br />
-                            <strong>Quantity:</strong> {{ $product->quantity }}<br />
+                            <strong>Quantity:</strong> {{ number_format($product->quantity) }} kg<br />
                             <strong>Description:</strong> {{ $product->description }}<br />
-                            <strong>Starting Price:</strong> PHP {{ number_format($product->starting_price, 2) }}<br />
+                            <strong>Starting Price:</strong> ₱{{ number_format($product->starting_price, 2) }}<br />
 
                             @if (!empty($highestBids[$product->id]))
-                                <strong>Highest Bid:</strong> PHP {{ number_format($highestBids[$product->id]->amount, 2) }}<br />
+                                <strong>Highest Bid:</strong> ₱{{ number_format($highestBids[$product->id]->amount, 2) }}<br />
                                 @if(Auth::id() == $product->auctioneer_id)
                                     <strong>Bidder:</strong> {{ $highestBids[$product->id]->bidder->name }}<br />
                                 @endif
@@ -301,12 +280,12 @@
 
                                         <p><strong class="fas fa-user fa-sm fa-fw mr-2 text-black-400"></strong>{{ $bidCounts[$product->id] ?? 0 }}</p>
                                         <p><strong>Category:</strong> {{ $product->category }}</p>
-                                        <p><strong>Quantity:</strong> {{ $product->quantity }}</p>
+                                        <p><strong>Quantity:</strong> {{ number_format($product->quantity) }} kg</p>
                                         <p><strong>Description:</strong> {{ $product->description }}</p>
-                                        <p><strong>Starting Price:</strong> PHP {{ number_format($product->starting_price, 2) }}</p>
+                                        <p><strong>Starting Price:</strong> ₱{{ number_format($product->starting_price, 2) }}</p>
 
                                         @if (!empty($highestBids[$product->id]))
-                                            <p><strong>Highest Bid:</strong> PHP {{ number_format($highestBids[$product->id]->amount, 2) }}</p>
+                                            <p><strong>Highest Bid:</strong> ₱{{ number_format($highestBids[$product->id]->amount, 2) }}</p>
                                             @if(Auth::id() == $product->auctioneer_id)
                                                 <p>
                                                     <strong>Bidder:</strong>
@@ -355,7 +334,7 @@
                                                     {{ $highestBids[$product->id]->bidder->name }}
                                                 </a>
                                             </p>
-                                            <p><strong>Winning Bid:</strong> PHP {{ number_format($highestBids[$product->id]->amount, 2) }}</p>
+                                            <p><strong>Winning Bid:</strong> ₱{{ number_format($highestBids[$product->id]->amount, 2) }}</p>
                                         @else
                                             <p>No winner for this product.</p>
                                         @endif
@@ -381,7 +360,7 @@
                                                                     {{ $bid->bidder->name }}
                                                                 </a>
                                                             </td>
-                                                            <td>PHP {{ number_format($bid->amount, 2) }}</td>
+                                                            <td>₱{{ number_format($bid->amount, 2) }}</td>
                                                             <td>{{ $bid->created_at->format('d-m-Y H:i:s') }}</td>
                                                         </tr>
                                                     @endforeach

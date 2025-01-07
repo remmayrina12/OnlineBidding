@@ -54,7 +54,10 @@ public function bidderIndex(Request $request)
 
         ]);
 
-        return redirect()->back()->with('success', "User has been suspended for {$suspensionDays} day(s).");
+        return redirect()->back()->with('alert', [
+                                            'type' => 'success',
+                                            'message' => "User has been suspended for {$suspensionDays} day(s).",
+                                            ]);
     }
 
 
@@ -66,7 +69,10 @@ public function bidderIndex(Request $request)
             'suspension_until' => null, // No suspension date needed for banned users
         ]);
 
-        return redirect()->back()->with('success', 'User has been banned.');
+        return redirect()->back()->with('alert', [
+                                            'type' => 'success',
+                                            'message' => 'User has been banned.',
+                                            ]);
     }
 
     // Unsuspend a user
@@ -81,10 +87,16 @@ public function bidderIndex(Request $request)
                 'suspension_until' => null, // Clear the suspension end date
             ]);
 
-            return redirect()->back()->with('success', 'User has been unsuspended.');
+            return redirect()->back()->with('alert', [
+                                                'type' => 'success',
+                                                'message' => 'User has been unsuspended.',
+                                            ]);
         }
 
-        return redirect()->back()->with('error', 'User is not suspended.');
+        return redirect()->back()->with('alert', [
+                                            'type' => 'error',
+                                            'message' => 'User is not suspended.',
+                                        ]);
     }
 
     // Unban a user
@@ -96,9 +108,15 @@ public function bidderIndex(Request $request)
         if ($user->status === 'banned') {
             $user->update(['status' => 'active']);
 
-            return redirect()->back()->with('success', 'User has been unbanned.');
+            return redirect()->back()->with('alert', [
+                                                'type' => 'success',
+                                                'message' => 'User has been unbanned.',
+                                            ]);
         }
 
-        return redirect()->back()->with('error', 'User is not banned.');
+        return redirect()->back()->with('alert', [
+                                            'type' => 'error',
+                                            'message' => 'User is not banned.',
+                                        ]);
     }
 }

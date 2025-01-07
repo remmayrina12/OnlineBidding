@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Notifications\AuctionEndedNotification;
 use App\Notifications\ProductRequestNotification;
+use App\Notifications\TwilioProductRequestNotification;
 
 class ProductController extends Controller
 {
@@ -82,7 +83,10 @@ class ProductController extends Controller
         }
 
         // Redirect with success session
-        return redirect()->back()->with('success', 'The Product is successfully requested.');
+        return redirect()->back()->with('alert', [
+                                            'type' => 'success',
+                                            'message' => 'The Product is successfully requested.',
+                                        ]);
     }
 
     /**
@@ -166,7 +170,10 @@ class ProductController extends Controller
         $product->save();
 
         // Redirect to a success page or back to the dashboard with a success message
-        return redirect()->route('auctioneer.index')->with('success', 'Product updated successfully.');
+        return redirect()->route('auctioneer.index')->with('alert', [
+                                                                        'type' => 'success',
+                                                                        'message' => 'Product updated successfully.',
+                                                                    ]);
     }
 
 
@@ -198,7 +205,10 @@ class ProductController extends Controller
         $product->forceDelete();
 
         // Redirect back to the auctioneer index page
-        return redirect()->route('auctioneer.index')->with('success', 'The Product deleted successfully.');
+        return redirect()->route('auctioneer.index')->with('alert', [
+                                                                        'type' => 'success',
+                                                                        'message' => 'The Product deleted successfully.',
+                                                                    ]);
     }
 
     public function archived()
@@ -329,7 +339,10 @@ class ProductController extends Controller
         }
 
         // Return a success message or redirect back to the page
-        return redirect()->back()->with('success', 'Auction has been ended successfully, and notifications have been sent.');
+        return redirect()->back()->with('alert', [
+                                            'type' => 'success',
+                                            'message' => 'Auction has been ended successfully, and notifications have been sent.',
+                                        ]);
         }
     }
 }

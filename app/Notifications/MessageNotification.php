@@ -3,9 +3,10 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 
 class MessageNotification extends Notification
 {
@@ -25,7 +26,7 @@ class MessageNotification extends Notification
      */
     public function via(object $notifiable)
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -39,5 +40,14 @@ class MessageNotification extends Notification
             'sender_name' => $this->message->sender->name,
             'message' => $this->message->sender->name . ' sent you a message. Go visit his/her profile'
         ];
+    }
+
+    public function toMail($notifiable)
+    {
+        return (new MailMessage)
+            ->subject('Message Notification')
+            ->line($this->message->sender->name . ' sent you a message. Go visit his/her profile')
+            ->action('View Details', url('/home'))
+            ->line('Thank you for using our application!');
     }
 }

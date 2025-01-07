@@ -34,7 +34,6 @@
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
 <style>
-    /* Dropdown Menu Styling */
     #alertsDropdown {
         position: relative;
     }
@@ -85,6 +84,40 @@
             width: 100%;
         }
     }
+    #custom-alert {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10000;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        background-color: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #custom-alert h3 {
+        margin: 0 0 10px;
+    }
+
+    #custom-alert p {
+        margin: 0 0 20px;
+    }
+
+    #custom-alert-ok {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    #custom-alert-ok:hover {
+        background-color: #0056b3;
+    }
 </style>
 </head>
 
@@ -116,16 +149,14 @@
 
                     <!-- Divider -->
                     <hr class="sidebar-divider my-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('profile.show', Auth::user()->id) }}">
+                            <i class="fas fa-fw fa-tachometer-alt"></i>
+                            <span>View Profile</span></a>
+                    </li>
 
                     <!-- Auctioneer -->
                     @if (Auth::check() && Auth::user()->role == 'auctioneer')
-
-                        <!-- Divider -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('profile.show', Auth::user()->id) }}">
-                                <i class="fas fa-fw fa-tachometer-alt"></i>
-                                <span>View Profile</span></a>
-                        </li>
 
                         <hr class="sidebar-divider">
 
@@ -171,13 +202,6 @@
                     <!-- Bidder -->
                     @if (Auth::check() && Auth::user()->role == 'bidder')
 
-                        <!-- Divider -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('profile.show', Auth::user()->id) }}">
-                                <i class="fas fa-fw fa-tachometer-alt"></i>
-                                <span>View Profile</span></a>
-                        </li>
-
                         <hr class="sidebar-divider">
 
                         <li class="nav-item">
@@ -192,7 +216,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('bidder.show') }}">
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
-                                <span>Show</span></a>
+                                <span>Show auction bid</span></a>
                         </li>
 
                         <!-- Divider -->
@@ -201,7 +225,7 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('bidder.showAuctionWin') }}">
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
-                                <span>Auction Win</span></a>
+                                <span>Auction Won</span></a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('notifications.index') }}">
@@ -272,6 +296,22 @@
                             <a class="nav-link" href="{{ route('home.show') }}">
                                 <i class="fas fa-fw fa-tachometer-alt"></i>
                                 <span>Home</span></a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseReports"
+                                aria-expanded="true" aria-controls="collapseReports">
+                                <i class="fas fa-fw fa-cog"></i>
+                                <span>Reports</span>
+                            </a>
+                            <div id="collapseReports" class="collapse" aria-labelledby="headingReports" data-parent="#accordionSidebar">
+                                <div class="bg-white py-2 collapse-inner rounded">
+                                    <h6 class="collapse-header">Reports:</h6>
+                                    <a class="collapse-item" href="{{ route('reportForListOfWinningBid.getTopRanks') }}">List Of Winning Bid</a>
+                                    <a class="collapse-item" href="{{ route('reportForTopBidder.getTopBidders') }}">Top Bidder</a>
+                                    <a class="collapse-item" href="{{ route('reportForTopSeller.getTopSellers') }}">Top Seller</a>
+                                </div>
+                            </div>
                         </li>
                     @endif
 
@@ -435,9 +475,6 @@
 
     {{-- countdown script --}}
     <script src="{{ asset('js/countdown.js') }}"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <!-- Make sure you include jQuery and Bootstrap's JavaScript (for Bootstrap 4/5) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -460,5 +497,40 @@
     });
     </script>
 
-</body>
+    <!-- Custom Alert Container -->
+    <div id="custom-alert" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10000; padding: 20px; border-radius: 10px; text-align: center; background-color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h3 id="custom-alert-title" style="margin: 0 0 10px;"></h3>
+        <p id="custom-alert-message" style="margin: 0 0 20px;"></p>
+        <button id="custom-alert-ok" style="padding: 10px 20px; background-color: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer;">OK</button>
+    </div>
+
+    <!-- JavaScript for Custom Alert -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if(session()->has('alert'))
+                const alertData = @json(session('alert'));
+
+                // Get alert elements
+                const alertBox = document.getElementById('custom-alert');
+                const alertTitle = document.getElementById('custom-alert-title');
+                const alertMessage = document.getElementById('custom-alert-message');
+                const alertOkButton = document.getElementById('custom-alert-ok');
+
+                // Set alert content
+                alertTitle.textContent = alertData.type === 'success' ? 'Success!' : (alertData.type === 'error' ? 'Error!' : 'Warning!');
+                alertMessage.textContent = alertData.message;
+
+                // Set alert styles based on type
+                alertBox.style.display = 'block';
+                alertBox.style.border = `2px solid ${alertData.type === 'success' ? '#28a745' : (alertData.type === 'error' ? '#dc3545' : '#ffc107')}`;
+
+                // Close alert on clicking "OK"
+                alertOkButton.addEventListener('click', () => {
+                    alertBox.style.display = 'none';
+                });
+            @endif
+        });
+    </script>
+
+    </body>
 </html>

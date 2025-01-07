@@ -37,18 +37,6 @@
         margin-top: 1.5rem;
     }
 </style>
-
-@if(session('success'))
-<script>
-    Swal.fire({
-        title: 'Success!',
-        text: "{{ session('success') }}",
-        icon: 'success',
-        confirmButtonText: 'OK'
-    });
-</script>
-@endif
-
 <div class="py-12">
     <div class="container">
         <div class="card">
@@ -87,15 +75,15 @@
                                     </td>
                                     <td>{{ $product->product_name }}</td>
                                     <td>{{ $product->category }}</td>
-                                    <td>{{ $product->quantity }}</td>
+                                    <td>{{ number_format($product->quantity) }} kg</td>
                                     <td>{{ $product->description }}</td>
-                                    <td>PHP {{ number_format($product->starting_price, 2) }}</td>
+                                    <td>₱{{ number_format($product->starting_price, 2) }}</td>
                                     <td id="countdownTimer{{ $product->id }}" class="auction-timer" data-end-time="{{ strtotime($product->auction_time) }}" data-auction-status="{{ $product->auction_status }}"></td>
                                     @if (!empty($highestBids[$product->id]))
                                         <td>Name: <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->id) }}">
                                                     {{ $highestBids[$product->id]->bidder->name }}
                                                 </a> <br>
-                                        Highest Bid: PHP {{ number_format($highestBids[$product->id]->amount, 2)}}</td>
+                                        Highest Bid: ₱{{ number_format($highestBids[$product->id]->amount, 2)}}</td>
                                     @else
                                         <td>No Bidder</td>
                                     @endif
@@ -154,14 +142,14 @@
                         <div class="col-md-6 col-12">
                             <p><strong>Product Name:</strong> {{ $product->product_name }}</p>
                             <p><strong>Category:</strong> {{ $product->category }}</p>
-                            <p><strong>Quantity:</strong> {{ $product->quantity }}</p>
+                            <p><strong>Quantity:</strong> {{ number_format($product->quantity) }} kg</p>
                             <p><strong>Description:</strong> {{ $product->description }}</p>
-                            <p><strong>Starting Price:</strong> PHP {{ number_format($product->starting_price, 2) }}</p>
+                            <p><strong>Starting Price:</strong> ₱{{ number_format($product->starting_price, 2) }}</p>
                             @if (!empty($highestBids[$product->id]))
                                 <p><strong>Bidder:</strong> <a href="{{ route('profile.show', $highestBids[$product->id]->bidder->id) }}">
                                                                 {{ $highestBids[$product->id]->bidder->name }}
                                                             </a></p>
-                                <p><strong>Highest Bid:</strong> PHP {{number_format($highestBids[$product->id]->amount, 2)}}</p>
+                                <p><strong>Highest Bid:</strong> ₱{{ number_format($highestBids[$product->id]->amount, 2)}}</p>
                             @else
                                 <td>No Bidder</td>
                             @endif
